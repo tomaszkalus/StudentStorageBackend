@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using StudentStorage.Models;
 using StudentStorage.Models.Authentication;
+using StudentStorage.Models.Responses;
+using StudentStorage.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -16,22 +19,25 @@ namespace StudentStorage.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
+        private readonly AccountService _accountService;
 
         public AuthenticateController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            AccountService accountService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _accountService = accountService;
         }
 
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.Username);
+            var user = await _userManager.FindByNameAsync(model.Email);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
                 var userRoles = await _userManager.GetRolesAsync(user);
@@ -59,63 +65,42 @@ namespace StudentStorage.Controllers
         }
 
         [HttpPost]
-        [Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        [Route("register-student")]
+        public async Task<IActionResult> RegisterStudent([FromBody] RegisterModel model)
         {
-            var userExists = await _userManager.FindByEmailAsync(model.Email);
-            if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
-
-            ApplicationUser user = new()
+            var result = await _accountService.RegisterStudent(model);
+            if (result.Succeeded)
+                return Ok(new ResponseSuccess { Status = "Success", Message = "User created successfully!" });
+            else
             {
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-            };
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+                var errors = string.Join(", ", result.Errors.Select(x => x.Description));
+                var descriptions = result.Errors.Select(x => x.Description).ToList();
+                return BadRequest(new ResponseFail { Status = "Error", Message = $"User creation failed", Data = descriptions });
+            }
+        }
 
-            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+        [HttpPost]
+        [Route("register-teacher")]
+        //[Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> RegisterTeacher([FromBody] RegisterModel model)
+        {
+            var result = await _accountService.RegisterTeacher(model);
+            if (result.Succeeded)
+                return Ok(new ResponseSuccess { Status = "Success", Message = "User created successfully!" });
+            else
+                return BadRequest(new ResponseFail { Status = "Error", Message = "User creation failed!" });
         }
 
         [HttpPost]
         [Route("register-admin")]
+        //[Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
         {
-            var userExists = await _userManager.FindByEmailAsync(model.Email);
-            if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
-
-            ApplicationUser user = new()
-            {
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-            };
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
-
-            if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
-            if (!await _roleManager.RoleExistsAsync(UserRoles.Teacher))
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Teacher));
-            if (!await _roleManager.RoleExistsAsync(UserRoles.Student))
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Student));
-            
-
-            if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
-            {
-                await _userManager.AddToRoleAsync(user, UserRoles.Admin);
-            }
-            if (await _roleManager.RoleExistsAsync(UserRoles.Teacher))
-            {
-                await _userManager.AddToRoleAsync(user, UserRoles.Teacher);
-            }
-            if (await _roleManager.RoleExistsAsync(UserRoles.Student))
-            {
-                await _userManager.AddToRoleAsync(user, UserRoles.Student);
-            }
-            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+            var result = await _accountService.RegisterAdmin(model);
+            if (result.Succeeded)
+                return Ok(new ResponseSuccess { Status = "Success", Message = "User created successfully!" });
+            else
+                return BadRequest(new ResponseFail { Status = "Error", Message = "User creation failed!" });
         }
 
         private JwtSecurityToken GetToken(List<Claim> authClaims)
