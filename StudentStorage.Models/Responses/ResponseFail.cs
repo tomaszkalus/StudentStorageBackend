@@ -8,8 +8,7 @@ namespace StudentStorage.Models.Responses
 {
     public class ResponseFail
     {
-        public string? Status { get; set; }
-        public string? Message { get; set; }
+        public string Status => "fail";
         public object? Data { get; set; }
     }
 }

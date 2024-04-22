@@ -1,3 +1,5 @@
+using BookStoreMVC.DataAccess.Repository;
+using BookStoreMVC.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +16,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddClaimsPrincipalFactory<UserClaimsPrincipalFactory<ApplicationUser, IdentityRole>>();
+
+//builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+//    .AddDefaultTokenProviders()
+
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -37,6 +45,7 @@ builder.Services.AddAuthentication(options =>
  });
 
 
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -53,8 +62,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
