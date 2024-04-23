@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using StudentStorage.Models;
 using StudentStorage.Models.Authentication;
 using StudentStorage.Models.DTO;
+using StudentStorage.Models.Responses;
 using System.Security.Claims;
 
 namespace StudentStorage.Controllers
@@ -33,49 +34,63 @@ namespace StudentStorage.Controllers
 
         // GET api/CourseController/5
         [HttpGet("{id}")]
-        public Course Get(int id)
+        public IActionResult Get(int id)
         {
-            return _unitOfWork.Course.GetById(id);
+
+            Course? course = _unitOfWork.Course.GetById(id);
+            if (course == null)
+            {
+                return BadRequest();
+            }
+            return Ok(course);
         }
 
         // POST api/CourseController
         [HttpPost]
         [Authorize(Roles = UserRoles.Teacher)]
-        public async Task Post([FromBody] CourseDTO courseDTO)
+        public async Task<ActionResult> Post([FromBody] CourseDTO courseDTO)
         {
             ApplicationUser? currentUser = await _userManager.GetUserAsync(HttpContext.User);
-            //var currentUser = User.FindFirstValue(ClaimTypes.NameIdentifier);
             Course course = new Course
             {
                 CreatorId = currentUser.Id,
                 Name = courseDTO.Name,
-                Description = courseDTO.Description
+                Description = courseDTO.Description,
+                CreatedAt = DateTime.Now
             };
             _unitOfWork.Course.Add(course);
             _unitOfWork.Save();
+            return Ok(course);
         }
 
         // PUT api/CourseController/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] CourseDTO courseDTO)
+        public async Task<ActionResult> Put(int id, [FromBody] CourseDTO courseDTO)
         {
-            Course course = _unitOfWork.Course.GetById(id);
+            Course? course = _unitOfWork.Course.GetById(id);
+            if (course == null)
+            {
+                return BadRequest();
+            }   
             course.Name = courseDTO.Name;
             course.Description = courseDTO.Description;
             _unitOfWork.Course.Update(course);
             _unitOfWork.Save();
+            return Ok(course);
         }
 
         // DELETE api/CourseController/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
-            Course course = _unitOfWork.Course.GetById(id);
-            if (course != null)
+            Course? course = _unitOfWork.Course.GetById(id);
+            if (course == null)
             {
-                _unitOfWork.Course.Remove(course);
-                _unitOfWork.Save();
+                return NotFound();
             }
+            _unitOfWork.Course.Remove(course);
+            _unitOfWork.Save();
+            return Ok();
         }
     }
 }

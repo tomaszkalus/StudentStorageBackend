@@ -14,12 +14,12 @@ namespace BookStoreMVC.DataAccess.Repository
 
         public Course? GetById(int id)
         {
-            return _db.Course.FirstOrDefault(p => p.Id == id);
+            return _db.Courses.FirstOrDefault(p => p.Id == id);
         }
 
         public void Update(Course course)
         {
-            var objFromDb = _db.Course.FirstOrDefault(s => s.Id == course.Id);
+            var objFromDb = _db.Courses.FirstOrDefault(s => s.Id == course.Id);
             if (objFromDb != null)
             {
                 objFromDb.Name = course.Name;

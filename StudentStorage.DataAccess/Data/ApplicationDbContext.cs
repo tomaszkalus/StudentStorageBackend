@@ -6,11 +6,11 @@ namespace StudentStorage.DataAccess.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public DbSet<Course> Course { get; set; }
-        public DbSet<Assignment> Assignment { get; set; }
-        public DbSet<ApplicationUser> User { get; set; }
-        public DbSet<Request> Request { get; set; }
-        public DbSet<Solution> Solution { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<Assignment> Assignments { get; set; }
+        public DbSet<ApplicationUser> Users { get; set; }
+        public DbSet<Request> Requests { get; set; }
+        public DbSet<Solution> Solutions { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
