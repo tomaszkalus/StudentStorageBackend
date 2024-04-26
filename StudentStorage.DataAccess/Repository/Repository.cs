@@ -1,6 +1,7 @@
 ﻿using BookStoreMVC.DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using StudentStorage.DataAccess.Data;
+using System.Linq.Expressions;
 
 namespace BookStoreMVC.DataAccess.Repository
 {
@@ -13,12 +14,12 @@ namespace BookStoreMVC.DataAccess.Repository
             _db = db;
             this.dbSet = _db.Set<T>();
         }
-        public void Add(T entity)
+        public async void AddAsync(T entity)
         {
             dbSet.Add(entity);
         }
 
-        public T Get(System.Linq.Expressions.Expression<Func<T, bool>> filter, string? includeProperties = null)
+        public async Task<T?> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
             query = query.Where(filter);
@@ -30,11 +31,10 @@ namespace BookStoreMVC.DataAccess.Repository
                     query = query.Include(includeProp);
                 }
             }
-            return query.FirstOrDefault();
-
+            return await query.FirstOrDefaultAsync();
         }
 
-        public IEnumerable<T> GetAll(string? includeProperties = null)
+        public async Task<IEnumerable<T>> GetAllAsync(string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
             if (!string.IsNullOrEmpty(includeProperties))
@@ -48,15 +48,14 @@ namespace BookStoreMVC.DataAccess.Repository
             return query.ToList();
         }
 
-        //public T GetById(int id)
-        //{
-        //    IQueryable<T> query = dbSet;
-
-        //}
-
         public void Remove(T entity)
         {
             dbSet.Remove(entity);
+        }
+
+        public void RemoveAsync(T entity)
+        {
+            throw new NotImplementedException();
         }
 
         public void RemoveRange(IEnumerable<T> entity)

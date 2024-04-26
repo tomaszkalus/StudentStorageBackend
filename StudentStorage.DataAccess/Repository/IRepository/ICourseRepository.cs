@@ -4,7 +4,7 @@ namespace BookStoreMVC.DataAccess.Repository.IRepository
 {
     public interface ICourseRepository : IRepository<Course>
     {
-        void Update(Course course);
-        public Course? GetById(int id);
+        Task<Course?> GetByIdAsync(int id);
+        Task UpdateAsync(Course course);
     }
 }

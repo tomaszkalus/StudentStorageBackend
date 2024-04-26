@@ -11,13 +11,15 @@ namespace StudentStorage.Models
     {
         public int Id { get; set; }
         public string CreatorId { get; set; }
-        [ForeignKey("CreatorId")]
-        public ApplicationUser Creator { get; set; }
         public int AssignmentId { get; set; }
-        [ForeignKey("AssignmentId")]
-        public Assignment Assignment { get; set; }
         public string FilePath { get; set; }
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        // navigation properties
+        [ForeignKey("AssignmentId")]
+        public Assignment Assignment { get; set; }
+        [ForeignKey("CreatorId")]
+        public ApplicationUser Creator { get; set; }
     }
 }

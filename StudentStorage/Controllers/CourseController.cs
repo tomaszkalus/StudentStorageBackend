@@ -1,12 +1,11 @@
-﻿using BookStoreMVC.DataAccess.Repository.IRepository;
+﻿using AutoMapper;
+using BookStoreMVC.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using StudentStorage.Models;
 using StudentStorage.Models.Authentication;
 using StudentStorage.Models.DTO;
-using StudentStorage.Models.Responses;
-using System.Security.Claims;
 
 namespace StudentStorage.Controllers
 {
@@ -17,38 +16,45 @@ namespace StudentStorage.Controllers
 
         IUnitOfWork _unitOfWork;
         UserManager<ApplicationUser> _userManager;
+        IMapper _mapper;
 
-        public CourseController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
+        public CourseController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _mapper = mapper;
 
         }
 
         // GET: api/CourseController
         [HttpGet]
-        public IEnumerable<Course> Get()
+        [Authorize(Roles = UserRoles.Student)]
+        public async Task<IActionResult> Get()
         {
-            return _unitOfWork.Course.GetAll();
+            var courses = await _unitOfWork.Course.GetAllAsync();
+            IEnumerable<CourseResponseDTO> courseResponseDTOs = courses.Select(_mapper.Map<CourseResponseDTO>);
+            return Ok(courseResponseDTOs);
         }
 
         // GET api/CourseController/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [Authorize(Roles = UserRoles.Student)]
+        public async Task<IActionResult> Get(int id)
         {
 
-            Course? course = _unitOfWork.Course.GetById(id);
+            Course? course = await _unitOfWork.Course.GetByIdAsync(id);
             if (course == null)
             {
                 return BadRequest();
             }
-            return Ok(course);
+            CourseResponseDTO courseResponseDTO = _mapper.Map<CourseResponseDTO>(course);
+            return Ok(courseResponseDTO);
         }
 
         // POST api/CourseController
         [HttpPost]
         [Authorize(Roles = UserRoles.Teacher)]
-        public async Task<ActionResult> Post([FromBody] CourseDTO courseDTO)
+        public async Task<ActionResult> Post([FromBody] CourseRequestDTO courseDTO)
         {
             ApplicationUser? currentUser = await _userManager.GetUserAsync(HttpContext.User);
             Course course = new Course
@@ -58,38 +64,42 @@ namespace StudentStorage.Controllers
                 Description = courseDTO.Description,
                 CreatedAt = DateTime.Now
             };
-            _unitOfWork.Course.Add(course);
-            _unitOfWork.Save();
-            return Ok(course);
+            
+            _unitOfWork.Course.AddAsync(course);
+            await _unitOfWork.SaveAsync();
+            CourseResponseDTO courseResponseDTO = _mapper.Map<CourseResponseDTO>(course);
+            return Ok(courseResponseDTO);
         }
 
         // PUT api/CourseController/5
         [HttpPut("{id}")]
-        public async Task<ActionResult> Put(int id, [FromBody] CourseDTO courseDTO)
+        [Authorize(Roles = UserRoles.Teacher)]
+        public async Task<ActionResult> Put(int id, [FromBody] CourseRequestDTO courseDTO)
         {
-            Course? course = _unitOfWork.Course.GetById(id);
+            Course? course = await _unitOfWork.Course.GetByIdAsync(id);
             if (course == null)
             {
                 return BadRequest();
-            }   
+            }
             course.Name = courseDTO.Name;
             course.Description = courseDTO.Description;
-            _unitOfWork.Course.Update(course);
-            _unitOfWork.Save();
+            await _unitOfWork.Course.UpdateAsync(course);
+            await _unitOfWork.SaveAsync();
             return Ok(course);
         }
 
         // DELETE api/CourseController/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        [Authorize(Roles = UserRoles.Teacher)]
+        public async Task<IActionResult> Delete(int id)
         {
-            Course? course = _unitOfWork.Course.GetById(id);
+            Course? course = await _unitOfWork.Course.GetByIdAsync(id);
             if (course == null)
             {
                 return NotFound();
             }
-            _unitOfWork.Course.Remove(course);
-            _unitOfWork.Save();
+            _unitOfWork.Course.RemoveAsync(course);
+            await _unitOfWork.SaveAsync();
             return Ok();
         }
     }

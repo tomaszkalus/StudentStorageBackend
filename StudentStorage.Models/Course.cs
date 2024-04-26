@@ -6,11 +6,13 @@ namespace StudentStorage.Models
     {
         public int Id { get; set; }
         public string CreatorId { get; set; }
-        [ForeignKey("CreatorId")]
-        public ApplicationUser Creator { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        // navigation properties
+        [ForeignKey("CreatorId")]
+        public ApplicationUser Creator { get; set; }
         public ICollection<Assignment> Assignments { get; } = [];
         public ICollection<Request> Requests { get; } = [];
     }

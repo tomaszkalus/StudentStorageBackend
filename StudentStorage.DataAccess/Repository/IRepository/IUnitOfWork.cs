@@ -9,6 +9,6 @@ namespace BookStoreMVC.DataAccess.Repository.IRepository
     public interface IUnitOfWork
     {
         ICourseRepository Course { get; }
-        void Save();
+        Task SaveAsync();
     }
 }

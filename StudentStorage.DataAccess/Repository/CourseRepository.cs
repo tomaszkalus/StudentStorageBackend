@@ -1,4 +1,5 @@
 ﻿using BookStoreMVC.DataAccess.Repository.IRepository;
+using Microsoft.EntityFrameworkCore;
 using StudentStorage.DataAccess.Data;
 using StudentStorage.Models;
 
@@ -12,18 +13,19 @@ namespace BookStoreMVC.DataAccess.Repository
             _db = db;
         }
 
-        public Course? GetById(int id)
+        public async Task<Course?> GetByIdAsync(int id)
         {
-            return _db.Courses.FirstOrDefault(p => p.Id == id);
+            return await _db.Courses.FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public void Update(Course course)
+        public async Task UpdateAsync(Course course)
         {
-            var objFromDb = _db.Courses.FirstOrDefault(s => s.Id == course.Id);
+            var objFromDb = await _db.Courses.FirstOrDefaultAsync(s => s.Id == course.Id);
             if (objFromDb != null)
             {
                 objFromDb.Name = course.Name;
                 objFromDb.Description = course.Description;
+                await _db.SaveChangesAsync();
             }
         }
     }

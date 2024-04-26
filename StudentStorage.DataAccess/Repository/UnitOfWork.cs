@@ -14,9 +14,9 @@ namespace BookStoreMVC.DataAccess.Repository
             Course = new CourseRepository(_db);
         }
 
-        public void Save()
+        public async Task SaveAsync()
         {
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
     }
 }

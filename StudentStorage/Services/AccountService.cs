@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using StudentStorage.Models;
 using StudentStorage.Models.Authentication;
@@ -23,7 +21,7 @@ namespace StudentStorage.Services
             _configuration = configuration;
         }
 
-        public async Task<(JwtSecurityToken token, ApplicationUser user)> Login(LoginModel model)
+        public async Task<(JwtSecurityToken? token, ApplicationUser? user)> Login(LoginModel model)
         {
             var user = await _userManager.FindByNameAsync(model.Email);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
@@ -37,9 +35,7 @@ namespace StudentStorage.Services
                 };
 
                 authClaims.AddRange(userRoles.Select(userRole => new Claim(ClaimTypes.Role, userRole)));
-
                 var token = GetToken(authClaims);
-
                 return (token, user);
             }
             return (null, null);
@@ -48,7 +44,6 @@ namespace StudentStorage.Services
         private JwtSecurityToken GetToken(List<Claim> authClaims)
         {
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
             var token = new JwtSecurityToken(
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
@@ -83,10 +78,7 @@ namespace StudentStorage.Services
 
             await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.NameIdentifier, user.Id));
 
-            if (!await _roleManager.RoleExistsAsync(role))
-                await _roleManager.CreateAsync(new IdentityRole(role));
-
-            await _userManager.AddToRoleAsync(user, role);
+            await AssignRole(user, role);
 
             return IdentityResult.Success;
         }
@@ -104,6 +96,34 @@ namespace StudentStorage.Services
         public Task<IdentityResult> RegisterAdmin(RegisterModel model)
         {
             return Register(model, UserRoles.Admin);
+        }
+
+        public async Task AssignRole(ApplicationUser user, string userRole)
+        {
+            List<string> roles = new();
+
+            switch (userRole)
+            {
+                case UserRoles.Admin:
+                    roles.Add(UserRoles.Admin);
+                    roles.Add(UserRoles.Teacher);
+                    roles.Add(UserRoles.Student);
+                    break;
+                case UserRoles.Teacher:
+                    roles.Add(UserRoles.Teacher);
+                    roles.Add(UserRoles.Student);
+                    break;
+                case UserRoles.Student:
+                    roles.Add(UserRoles.Student);
+                    break;
+            }
+
+            foreach (var role in roles)
+            {
+                if (!await _roleManager.RoleExistsAsync(role))
+                    await _roleManager.CreateAsync(new IdentityRole(role));
+                await _userManager.AddToRoleAsync(user, role);
+            }
         }
     }
 }
