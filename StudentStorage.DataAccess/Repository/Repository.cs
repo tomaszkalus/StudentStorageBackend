@@ -14,9 +14,10 @@ namespace BookStoreMVC.DataAccess.Repository
             _db = db;
             this.dbSet = _db.Set<T>();
         }
-        public async void AddAsync(T entity)
+        public async Task AddAsync(T entity)
         {
             dbSet.Add(entity);
+            await _db.SaveChangesAsync();
         }
 
         public async Task<T?> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null)
@@ -48,17 +49,12 @@ namespace BookStoreMVC.DataAccess.Repository
             return query.ToList();
         }
 
-        public void Remove(T entity)
+        public async Task RemoveAsync(T entity)
         {
             dbSet.Remove(entity);
         }
 
-        public void RemoveAsync(T entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveRange(IEnumerable<T> entity)
+        public async Task RemoveRange(IEnumerable<T> entity)
         {
             dbSet.RemoveRange(entity);
         }

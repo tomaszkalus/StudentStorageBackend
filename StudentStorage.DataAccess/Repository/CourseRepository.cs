@@ -15,7 +15,9 @@ namespace BookStoreMVC.DataAccess.Repository
 
         public async Task<Course?> GetByIdAsync(int id)
         {
-            return await _db.Courses.FirstOrDefaultAsync(p => p.Id == id);
+            return await _db.Courses
+                .Include(c => c.Creator)
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task UpdateAsync(Course course)

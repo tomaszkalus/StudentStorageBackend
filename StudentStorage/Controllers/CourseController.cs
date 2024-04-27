@@ -26,12 +26,12 @@ namespace StudentStorage.Controllers
 
         }
 
-        // GET: api/CourseController
+        // GET api/CourseController
         [HttpGet]
         [Authorize(Roles = UserRoles.Student)]
         public async Task<IActionResult> Get()
         {
-            var courses = await _unitOfWork.Course.GetAllAsync();
+            var courses = await _unitOfWork.Course.GetAllAsync(includeProperties: "Creator");
             IEnumerable<CourseResponseDTO> courseResponseDTOs = courses.Select(_mapper.Map<CourseResponseDTO>);
             return Ok(courseResponseDTOs);
         }
@@ -64,7 +64,7 @@ namespace StudentStorage.Controllers
                 Description = courseDTO.Description,
                 CreatedAt = DateTime.Now
             };
-            
+
             _unitOfWork.Course.AddAsync(course);
             await _unitOfWork.SaveAsync();
             CourseResponseDTO courseResponseDTO = _mapper.Map<CourseResponseDTO>(course);
@@ -85,7 +85,8 @@ namespace StudentStorage.Controllers
             course.Description = courseDTO.Description;
             await _unitOfWork.Course.UpdateAsync(course);
             await _unitOfWork.SaveAsync();
-            return Ok(course);
+            CourseResponseDTO courseResponseDTO = _mapper.Map<CourseResponseDTO>(course);
+            return Ok(courseResponseDTO);
         }
 
         // DELETE api/CourseController/5
@@ -98,7 +99,7 @@ namespace StudentStorage.Controllers
             {
                 return NotFound();
             }
-            _unitOfWork.Course.RemoveAsync(course);
+            await _unitOfWork.Course.RemoveAsync(course);
             await _unitOfWork.SaveAsync();
             return Ok();
         }

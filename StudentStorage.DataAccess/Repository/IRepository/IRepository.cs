@@ -6,7 +6,7 @@ namespace BookStoreMVC.DataAccess.Repository.IRepository
     {
         Task<IEnumerable<T>> GetAllAsync(string? includeProperties = null);
         Task<T?> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null);
-        void AddAsync(T entity);
-        void RemoveAsync(T entity);
+        Task RemoveAsync(T entity);
+        Task AddAsync(T entity);
     }
 }
