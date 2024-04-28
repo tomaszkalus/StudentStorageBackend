@@ -28,8 +28,9 @@ namespace StudentStorage.Controllers
 
         // GET api/CourseController
         [HttpGet]
+        [ProducesResponseType(200)]
         [Authorize(Roles = UserRoles.Student)]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetAll()
         {
             var courses = await _unitOfWork.Course.GetAllAsync(includeProperties: "Creator");
             IEnumerable<CourseResponseDTO> courseResponseDTOs = courses.Select(_mapper.Map<CourseResponseDTO>);
@@ -38,6 +39,8 @@ namespace StudentStorage.Controllers
 
         // GET api/CourseController/5
         [HttpGet("{id}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         [Authorize(Roles = UserRoles.Student)]
         public async Task<IActionResult> Get(int id)
         {
@@ -53,6 +56,7 @@ namespace StudentStorage.Controllers
 
         // POST api/CourseController
         [HttpPost]
+        [ProducesResponseType(200)]
         [Authorize(Roles = UserRoles.Teacher)]
         public async Task<ActionResult> Post([FromBody] CourseRequestDTO courseDTO)
         {
@@ -73,6 +77,8 @@ namespace StudentStorage.Controllers
 
         // PUT api/CourseController/5
         [HttpPut("{id}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         [Authorize(Roles = UserRoles.Teacher)]
         public async Task<ActionResult> Put(int id, [FromBody] CourseRequestDTO courseDTO)
         {
@@ -91,6 +97,8 @@ namespace StudentStorage.Controllers
 
         // DELETE api/CourseController/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         [Authorize(Roles = UserRoles.Teacher)]
         public async Task<IActionResult> Delete(int id)
         {

@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentStorage", "StudentStorage\StudentStorage.csproj", "{E0BB1A8D-D0B9-4F81-9C04-5B64416E4686}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudentStorage", "StudentStorage\StudentStorage.csproj", "{E0BB1A8D-D0B9-4F81-9C04-5B64416E4686}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudentStorage.DataAccess", "StudentStorage.DataAccess\StudentStorage.DataAccess.csproj", "{5FF440AE-4C4C-4E70-9695-A5557C61C7E7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudentStorage.Models", "StudentStorage.Models\StudentStorage.Models.csproj", "{06C8FCA3-B093-4ACB-BC74-C0DBC4AC1B22}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudentStorage.Utility", "StudentStorage.Utility\StudentStorage.Utility.csproj", "{325BACC2-E59E-4A00-B78C-552B53867810}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentStorage.Tests", "StudentStorage.Tests\StudentStorage.Tests.csproj", "{BE5FA83F-4299-404E-8B00-0E6FD41CF3B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{325BACC2-E59E-4A00-B78C-552B53867810}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{325BACC2-E59E-4A00-B78C-552B53867810}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{325BACC2-E59E-4A00-B78C-552B53867810}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE5FA83F-4299-404E-8B00-0E6FD41CF3B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE5FA83F-4299-404E-8B00-0E6FD41CF3B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE5FA83F-4299-404E-8B00-0E6FD41CF3B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE5FA83F-4299-404E-8B00-0E6FD41CF3B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
