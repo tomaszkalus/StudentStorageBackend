@@ -6,27 +6,27 @@ using Microsoft.AspNetCore.Mvc;
 using StudentStorage.Models;
 using StudentStorage.Models.Authentication;
 using StudentStorage.Models.DTO;
+using StudentStorage.Models.Enums;
 
 namespace StudentStorage.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class CourseController : ControllerBase
+    public class CoursesController : ControllerBase
     {
 
         IUnitOfWork _unitOfWork;
         UserManager<ApplicationUser> _userManager;
         IMapper _mapper;
 
-        public CourseController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper)
+        public CoursesController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
-
         }
 
-        // GET api/CourseController
+        // GET api/v1/Courses
         [HttpGet]
         [ProducesResponseType(200)]
         [Authorize(Roles = UserRoles.Student)]
@@ -37,7 +37,52 @@ namespace StudentStorage.Controllers
             return Ok(courseResponseDTOs);
         }
 
-        // GET api/CourseController/5
+        // POST /api/v1/Courses/5/Requests
+        [HttpPost("{courseId}/Requests")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [Authorize(Roles = UserRoles.Student)]
+        public async Task<IActionResult> SendRequest(int courseId)
+        {
+            Course? course = await _unitOfWork.Course.GetByIdAsync(courseId);
+            if (course == null)
+            {
+                return BadRequest();
+            }
+            ApplicationUser? currentUser = await _userManager.GetUserAsync(HttpContext.User);
+            Request request = new Request
+            {
+                CourseId = course.Id,
+                UserId = currentUser.Id,
+                Status = CourseRequestStatus.Pending,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
+            await _unitOfWork.Request.AddAsync(request);
+            await _unitOfWork.SaveAsync();
+            return Ok();
+        }
+
+        // GET api/v1/Courses/5/Requests/Pending
+        [HttpGet("{id}/Requests/Pending")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [Authorize(Roles = UserRoles.Teacher)]
+        public async Task<IActionResult> GetCourseRequests(int id)
+        {
+            Course? course = await _unitOfWork.Course.GetByIdAsync(id);
+            if (course == null)
+            {
+                return BadRequest();
+            }
+
+            var requests = course.Requests;
+            var pendingRequests = requests.Where(r => r.Status == CourseRequestStatus.Pending);
+            var requestResponseDTOs = requests.Select(_mapper.Map<RequestResponseDTO>);
+            return Ok(requestResponseDTOs);
+        }
+
+        // GET api/v1/Courses/5
         [HttpGet("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
@@ -54,7 +99,26 @@ namespace StudentStorage.Controllers
             return Ok(courseResponseDTO);
         }
 
-        // POST api/CourseController
+        // GET api/v1/Courses/5/Assignments
+        [HttpGet("{id}/Assignments")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [Authorize(Roles = UserRoles.Student)]
+        public async Task<IActionResult> GetCourseAssignments(int id)
+        {
+            Course? course = await _unitOfWork.Course.GetByIdAsync(id);
+            if (course == null)
+            {
+                return BadRequest();
+            }
+
+            ICollection<Assignment> assignments = course.Assignments;
+            IEnumerable<AssignmentResponseDTO> assignmentResponseDTOs = assignments.Select(_mapper.Map<AssignmentResponseDTO>);
+            return Ok(assignmentResponseDTOs);
+        }
+
+
+        // POST api/v1/Courses
         [HttpPost]
         [ProducesResponseType(200)]
         [Authorize(Roles = UserRoles.Teacher)]
@@ -75,7 +139,7 @@ namespace StudentStorage.Controllers
             return Ok(courseResponseDTO);
         }
 
-        // PUT api/CourseController/5
+        // PUT api/v1/Courses/5
         [HttpPut("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
@@ -95,7 +159,7 @@ namespace StudentStorage.Controllers
             return Ok(courseResponseDTO);
         }
 
-        // DELETE api/CourseController/5
+        // DELETE api/v1/Courses/5
         [HttpDelete("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]

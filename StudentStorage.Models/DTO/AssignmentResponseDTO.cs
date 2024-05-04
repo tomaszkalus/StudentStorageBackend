@@ -16,8 +16,6 @@ namespace StudentStorage.Models.DTO
         public DateTime DueDate { get; set; }
         public bool AllowLateSubmissions { get; set; }
         public bool Hidden { get; set; }
-        [ForeignKey("CourseId")]
         public CourseResponseDTO Course { get; set; }
-        //public ICollection<Solution> Solutions { get; } = [];
     }
 }

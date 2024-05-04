@@ -8,7 +8,16 @@ namespace StudentStorage.Models
         public int Id { get; set; }
         public int CourseId { get; set; }
         public string UserId { get; set; }
-        public CourseRequestStatus Status { get; set; }
+        private CourseRequestStatus _status;
+        public CourseRequestStatus Status
+        {
+            get { return _status; }
+            set
+            {
+                _status = value;
+                UpdatedAt = DateTime.Now;
+            }
+        }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 

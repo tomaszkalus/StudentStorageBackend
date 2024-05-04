@@ -15,5 +15,6 @@ namespace StudentStorage.Models
         public ApplicationUser Creator { get; set; }
         public ICollection<Assignment> Assignments { get; } = [];
         public ICollection<Request> Requests { get; } = [];
+        public ICollection<ApplicationUser> Students { get; } = [];
     }
 }

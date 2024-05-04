@@ -11,24 +11,23 @@ namespace StudentStorage.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class AssignmentController : ControllerBase
+    public class AssignmentsController : ControllerBase
     {
         IUnitOfWork _unitOfWork;
         UserManager<ApplicationUser> _userManager;
         IMapper _mapper;
 
-        public AssignmentController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper)
+        public AssignmentsController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
-
         }
 
-        // GET api/AssignmentController
+        // GET api/v1/Assignment
         [HttpGet]
-        [Authorize(Roles = UserRoles.Student)]
-        public async Task<IActionResult> Get()
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> GetAll()
         {
             var Assignments = await _unitOfWork.Assignment.GetAllAsync(includeProperties: "Creator");
             IEnumerable<AssignmentResponseDTO> AssignmentResponseDTOs = Assignments.Select(_mapper.Map<AssignmentResponseDTO>);
@@ -55,7 +54,6 @@ namespace StudentStorage.Controllers
         [Authorize(Roles = UserRoles.Teacher)]
         public async Task<ActionResult> Post([FromBody] AssignmentRequestDTO AssignmentDTO)
         {
-            ApplicationUser? currentUser = await _userManager.GetUserAsync(HttpContext.User);
             Assignment Assignment = new Assignment
             {
                 Title = AssignmentDTO.Title,
@@ -65,7 +63,7 @@ namespace StudentStorage.Controllers
                 Hidden = AssignmentDTO.Hidden,
             };
 
-            _unitOfWork.Assignment.AddAsync(Assignment);
+            await _unitOfWork.Assignment.AddAsync(Assignment);
             await _unitOfWork.SaveAsync();
             AssignmentResponseDTO AssignmentResponseDTO = _mapper.Map<AssignmentResponseDTO>(Assignment);
             return Ok(AssignmentResponseDTO);

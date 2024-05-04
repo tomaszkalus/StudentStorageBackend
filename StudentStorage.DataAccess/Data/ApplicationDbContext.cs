@@ -50,12 +50,6 @@ namespace StudentStorage.DataAccess.Data
                 .HasForeignKey(e => e.CreatorId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            
-
-            
-
-
-
         }
 
         

@@ -1,4 +1,5 @@
 ﻿using StudentStorage.DataAccess.Repository.IRepository;
+using StudentStorage.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,10 @@ namespace BookStoreMVC.DataAccess.Repository.IRepository
     {
         ICourseRepository Course { get; }
         IAssignmentRepository Assignment { get; }
+        IRequestRepository Request { get; }
+        IUserRepository User { get; }
 
+        Task ApproveCourseRequestTransactionAsync(Request request);
         Task SaveAsync();
     }
 }

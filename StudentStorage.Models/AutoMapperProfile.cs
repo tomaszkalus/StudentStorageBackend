@@ -19,6 +19,8 @@ namespace StudentStorage.Models
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.Creator));
+
+            CreateMap<Request, RequestResponseDTO>();
         }
     }
 }
