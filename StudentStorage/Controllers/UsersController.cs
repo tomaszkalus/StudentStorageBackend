@@ -11,7 +11,7 @@ using StudentStorage.Models.Enums;
 
 namespace StudentStorage.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("v1/api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -49,7 +49,7 @@ namespace StudentStorage.Controllers
             {
                 return BadRequest();
             }
-            IEnumerable<Course> courses = await _unitOfWork.User.GetCourses(userId);
+            IEnumerable<Course> courses = await _unitOfWork.User.GetUserCreatedCoursesAsync(userId);
             IEnumerable<CourseResponseDTO> courseResponseDTOs = courses.Select(_mapper.Map<CourseResponseDTO>);
             return Ok(courseResponseDTOs);
         }
@@ -66,7 +66,7 @@ namespace StudentStorage.Controllers
             {
                 return BadRequest();
             }
-            IEnumerable<Request> requests = await _unitOfWork.User.GetRequests(userId);
+            IEnumerable<Request> requests = await _unitOfWork.User.GetRequestsAsync(userId);
             var pendingRequests = requests.Where(r => r.Status == CourseRequestStatus.Pending);
             IEnumerable<RequestResponseDTO> requestResponseDTOs = requests.Select(_mapper.Map<RequestResponseDTO>);
             return Ok(requestResponseDTOs);

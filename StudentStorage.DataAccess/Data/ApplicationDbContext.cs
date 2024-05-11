@@ -33,6 +33,10 @@ namespace StudentStorage.DataAccess.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Course>()
+                .HasMany(e => e.Students)
+                .WithMany(e => e.Courses);
+
+            modelBuilder.Entity<Course>()
                 .HasMany(e => e.Requests)
                 .WithOne(e => e.Course)
                 .HasForeignKey(e => e.CourseId)

@@ -3,11 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using StudentStorage.DataAccess.Data;
 using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudentStorage.DataAccess.Repository
 {
@@ -32,7 +27,7 @@ namespace StudentStorage.DataAccess.Repository
             }
         }
 
-        public async Task<IEnumerable<Course>> GetCourses(string userId)
+        public async Task<IEnumerable<Course>> GetUserCreatedCoursesAsync(string userId)
         {
             return await _db.Courses
                 .Include(c => c.Creator)
@@ -40,12 +35,31 @@ namespace StudentStorage.DataAccess.Repository
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Request>> GetRequests(string userId)
+        public async Task<IEnumerable<Course>> GetCoursesAsync(string userId)
+        {
+            return await _db.Courses
+                .Include(c => c.Students)
+                .Where(c => c.Students.Any(s => s.Id == userId))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Request>> GetRequestsAsync(string userId)
         {
             return await _db.Requests
                 .Include(r => r.Course)
                 .Where(r => r.UserId == userId)
                 .ToListAsync();
+        }
+        public async Task<bool> IsCourseMemberAsync(string userId, int courseId)
+        {
+            return await _db.Courses
+                .AnyAsync(c => c.Id == courseId && c.Students.Any(s => s.Id == userId));
+        }
+
+        public async Task<bool> IsCourseAuthorAsync(string userId, int courseId)
+        {
+            return await _db.Courses
+                .AnyAsync(c => c.Id == courseId && c.CreatorId == userId);
         }
     }
 }

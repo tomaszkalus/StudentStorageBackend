@@ -1,16 +1,14 @@
 ﻿using BookStoreMVC.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudentStorage.DataAccess.Repository.IRepository
 {
     public interface IUserRepository : IRepository<ApplicationUser>
     {
-        Task<IEnumerable<Course>> GetCourses(string userId);
-        Task<IEnumerable<Request>> GetRequests(string userId);
+        Task<IEnumerable<Course>> GetUserCreatedCoursesAsync(string userId);
+        Task<IEnumerable<Request>> GetRequestsAsync(string userId);
+        Task<IEnumerable<Course>> GetCoursesAsync(string userId);
+        Task<bool> IsCourseMemberAsync(string userId, int courseId);
+        Task<bool> IsCourseAuthorAsync(string userId, int courseId);
     }
 }

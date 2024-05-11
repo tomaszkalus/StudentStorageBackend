@@ -1,6 +1,7 @@
 using AutoMapper;
 using BookStoreMVC.DataAccess.Repository.IRepository;
 using FakeItEasy;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +18,15 @@ namespace StudentStorage.Tests
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
+        private readonly IAuthorizationService _authorizationService;
 
         public CourseControllerTests()
         {
             _unitOfWork = A.Fake<IUnitOfWork>();
             _userManager = A.Fake<UserManager<ApplicationUser>>();
             _mapper = A.Fake<IMapper>();
-            _controller = new CoursesController(_unitOfWork, _userManager, _mapper);
+            _authorizationService = A.Fake<IAuthorizationService>();
+            _controller = new CoursesController(_unitOfWork, _userManager, _mapper, _authorizationService);
         }
 
         [Fact]

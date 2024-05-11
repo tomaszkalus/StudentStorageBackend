@@ -1,12 +1,15 @@
 using BookStoreMVC.DataAccess.Repository;
 using BookStoreMVC.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using StudentStorage.Authorization;
 using StudentStorage.DataAccess.Data;
 using StudentStorage.Models;
 using StudentStorage.Services;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,8 +22,11 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders();
     //.AddClaimsPrincipalFactory<UserClaimsPrincipalFactory<ApplicationUser, IdentityRole>>();
 
-//builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-//    .AddDefaultTokenProviders()
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("IsCourseMember", policy =>
+        policy.Requirements.Add(new CourseMembershipAuthorizationRequirement()));
+});
 
 
 
@@ -47,17 +53,27 @@ builder.Services.AddAuthentication(options =>
      };
  });
 
-
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<CourseRequestService>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("CourseMembershipPolicy", policy =>
+        policy.Requirements.Add(new CourseMembershipAuthorizationRequirement()));
+});
+builder.Services.AddScoped<IAuthorizationHandler, CourseMembershipAuthorizationHandler>();
 
 builder.Services.AddControllers();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 var app = builder.Build();
 
@@ -69,7 +85,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
