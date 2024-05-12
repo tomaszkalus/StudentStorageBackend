@@ -13,6 +13,10 @@ namespace StudentStorage.Models.DTO
     public class AssignmentRequestDTO
     {
         /// <summary>
+        /// Course ID
+        /// </summary>
+        public int CourseId { get; set; }
+        /// <summary>
         /// Assignment title
         /// </summary>
         public string Title { get; set; }

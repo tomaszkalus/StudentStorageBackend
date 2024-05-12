@@ -18,6 +18,7 @@ namespace BookStoreMVC.DataAccess.Repository
             return await _db.Courses
                 .Include(c => c.Creator)
                 .Include(c => c.Students)
+                .Include(c => c.Assignments)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 

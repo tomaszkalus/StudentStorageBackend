@@ -35,6 +35,10 @@ namespace StudentStorage.Controllers
         /// <returns>Returns an array of all courses</returns>
         /// <response code="200">Returns the created courses.</response>
         /// <response code="401">Access denied (Unauthorized)</response>
+        /// <returns>
+        /// A 200 OK response containing an array of all accessible courses, or a 401 Unauthorized response if the user is not authenticated or does not have the Student role.
+        /// Each course in the array is represented as a CourseResponseDTO, which includes the ID, name, and description of the course, as well as the ID of the creator.
+        /// </returns>
         // GET api/v1/Courses
         [HttpGet]
         [ProducesResponseType(typeof(List<CourseResponseDTO>), 200)]
@@ -74,7 +78,7 @@ namespace StudentStorage.Controllers
             {
                 return Forbid();
             }
-            CourseResponseDTO courseResponseDTO = _mapper.Map<CourseResponseDTO>(course);
+            CourseDetailResponseDTO courseResponseDTO = _mapper.Map<CourseDetailResponseDTO>(course);
             return Ok(courseResponseDTO);
         }
 
@@ -107,7 +111,8 @@ namespace StudentStorage.Controllers
             };
             await _unitOfWork.Request.AddAsync(request);
             await _unitOfWork.SaveAsync();
-            return Ok();
+            JoinRequestDTO joinRequestDTO = _mapper.Map<JoinRequestDTO>(request);
+            return Ok(joinRequestDTO);
         }
 
         /// <summary>
@@ -188,7 +193,7 @@ namespace StudentStorage.Controllers
         [Authorize(Roles = UserRoles.Teacher)]
         public async Task<ActionResult> Post([FromBody] CourseRequestDTO courseDTO)
         {
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string userId = _userManager.GetUserId(User);
             Course course = new Course
             {
                 CreatorId = userId,

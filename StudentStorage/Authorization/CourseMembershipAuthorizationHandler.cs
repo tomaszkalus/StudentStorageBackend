@@ -17,7 +17,8 @@ namespace StudentStorage.Authorization
             Course course)
         {
             var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId != null && await _unitOfWork.User.IsCourseMemberAsync(userId, course.Id))
+            if (userId != null && (await _unitOfWork.User.IsCourseMemberAsync(userId, course.Id) 
+                || await _unitOfWork.User.IsCourseAuthorAsync(userId, course.Id)))
             {
                 context.Succeed(requirement);
             }

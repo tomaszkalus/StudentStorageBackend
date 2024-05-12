@@ -78,11 +78,13 @@ namespace StudentStorage.Controllers
         {
             Assignment Assignment = new Assignment
             {
+                CourseId = AssignmentDTO.CourseId,
                 Title = AssignmentDTO.Title,
                 Description = AssignmentDTO.Description,
                 DueDate = AssignmentDTO.DueDate,
                 AllowLateSubmissions = AssignmentDTO.AllowLateSubmissions,
                 Hidden = AssignmentDTO.Hidden,
+                CreatedAt = DateTime.Now
             };
 
             await _unitOfWork.Assignment.AddAsync(Assignment);
