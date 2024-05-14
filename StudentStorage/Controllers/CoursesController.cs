@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using BookStoreMVC.DataAccess.Repository.IRepository;
+using StudentStorage.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -169,8 +169,9 @@ namespace StudentStorage.Controllers
             {
                 return NotFound();
             }
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (course.CreatorId != userId)
+            var authorizationResult = await _authorizationService
+            .AuthorizeAsync(User, course, "CourseMembershipPolicy");
+            if (!authorizationResult.Succeeded)
             {
                 return Forbid();
             }

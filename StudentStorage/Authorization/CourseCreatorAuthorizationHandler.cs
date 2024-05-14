@@ -5,19 +5,19 @@ using System.Security.Claims;
 
 namespace StudentStorage.Authorization
 {
-    public class CourseMembershipAuthorizationHandler : AuthorizationHandler<CourseMembershipAuthorizationRequirement, Course>
+    public class CourseCreatorAuthorizationHandler : AuthorizationHandler<CourseCreatorAuthorizationRequirement, Course>
     {
         private readonly IUnitOfWork _unitOfWork;
-        public CourseMembershipAuthorizationHandler(IUnitOfWork unitOfWork)
+        public CourseCreatorAuthorizationHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
-        protected async override Task<Task> HandleRequirementAsync(AuthorizationHandlerContext context,
-            CourseMembershipAuthorizationRequirement requirement,
-            Course course)
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, 
+            CourseCreatorAuthorizationRequirement requirement, 
+            Course resource)
         {
             var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId != null && (await _unitOfWork.User.IsCourseMemberAsync(userId, course.Id)))
+            if (userId != null && (userId == resource.CreatorId))
             {
                 context.Succeed(requirement);
             }

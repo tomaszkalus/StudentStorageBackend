@@ -2,8 +2,7 @@
 
 namespace StudentStorage.Authorization
 {
-    public class CourseMembershipAuthorizationRequirement : IAuthorizationRequirement
+    public class CourseCreatorAuthorizationRequirement : IAuthorizationRequirement
     {
-
     }
 }

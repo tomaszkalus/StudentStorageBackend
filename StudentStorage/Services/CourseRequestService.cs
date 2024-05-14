@@ -1,4 +1,4 @@
-﻿using BookStoreMVC.DataAccess.Repository.IRepository;
+﻿using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
 using StudentStorage.Models.Enums;
 using StudentStorage.Models.Exceptions;
@@ -28,20 +28,31 @@ namespace StudentStorage.Services
             await _unitOfWork.SaveAsync();
         }
 
-        public async Task UpdateRequestStatus(Request request)
+        public async Task UpdateRequestStatus(Request request, CourseRequestStatus status)
         {
-            if(request.Status == CourseRequestStatus.Approved)
+
+            if(request == null)
+            {
+                throw new ArgumentNullException(nameof(request), "Request cannot be null");
+            }
+            if(request.Status != CourseRequestStatus.Pending)
+            {
+                throw new InvalidOperationException("Only requests with pending status can be updated.");
+            }
+
+            if(status == CourseRequestStatus.Approved)
             {
                 await ApproveRequest(request);
             }
-            else if(request.Status == CourseRequestStatus.Denied)
+            else if(status == CourseRequestStatus.Denied)
             {
                 await DeclineRequest(request);
             }
             else
             {
-                throw new InvalidStatusException("The status value of Request is invalid.");
+                throw new InvalidOperationException("Request can only be updated as approved or denied.");
             }
+
         }
     }
 }

@@ -15,6 +15,5 @@ namespace StudentStorage.Models.DTO
         public string UserId { get; set; }
         public CourseRequestStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
-        public ApplicationUser UserDTO { get; set; }
     }
 }

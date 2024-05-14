@@ -1,5 +1,5 @@
 using AutoMapper;
-using BookStoreMVC.DataAccess.Repository.IRepository;
+using StudentStorage.DataAccess.Repository.IRepository;
 using FakeItEasy;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -20,7 +20,7 @@ namespace StudentStorage.Tests
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly IAuthorizationService _authorizationService;
-        private readonly ClaimsPrincipalWrapper _claimsPrincipalWrapper;
+        //private readonly ClaimsPrincipalWrapper _claimsPrincipalWrapper;
 
         public CourseControllerTests()
         {

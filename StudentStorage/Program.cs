@@ -1,9 +1,10 @@
-using BookStoreMVC.DataAccess.Repository;
-using BookStoreMVC.DataAccess.Repository.IRepository;
+using StudentStorage.DataAccess.Repository;
+using StudentStorage.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using StudentStorage.Authorization;
 using StudentStorage.DataAccess.Data;
@@ -22,13 +23,11 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders();
     //.AddClaimsPrincipalFactory<UserClaimsPrincipalFactory<ApplicationUser, IdentityRole>>();
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("IsCourseMember", policy =>
-        policy.Requirements.Add(new CourseMembershipAuthorizationRequirement()));
-});
-
-
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.AddPolicy("IsCourseMember", policy =>
+//        policy.Requirements.Add(new CourseMembershipAuthorizationRequirement()));
+//});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -48,8 +47,7 @@ builder.Services.AddAuthentication(options =>
          ValidateIssuerSigningKey = true,
          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"])),
          ValidAudience = configuration["JWT:ValidAudience"],
-         ValidIssuer = configuration["JWT:ValidIssuer"],
-         
+         ValidIssuer = configuration["JWT:ValidIssuer"],  
      };
  });
 
@@ -57,12 +55,22 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<CourseRequestService>();
 
+
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("CourseMembershipPolicy", policy =>
-        policy.Requirements.Add(new CourseMembershipAuthorizationRequirement()));
+    {
+        policy.Requirements.Add(new CourseMembershipAuthorizationRequirement());
+        policy.Requirements.Add(new CourseCreatorAuthorizationRequirement());
+    });
+
+    options.AddPolicy("CourseCreatorPolicy", policy =>
+        policy.Requirements.Add(new CourseCreatorAuthorizationRequirement()));
 });
+
 builder.Services.AddScoped<IAuthorizationHandler, CourseMembershipAuthorizationHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, CourseCreatorAuthorizationHandler>();
 
 builder.Services.AddControllers();
 

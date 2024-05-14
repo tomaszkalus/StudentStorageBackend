@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using BookStoreMVC.DataAccess.Repository.IRepository;
+using StudentStorage.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

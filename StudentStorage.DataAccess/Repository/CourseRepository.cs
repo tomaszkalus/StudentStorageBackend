@@ -1,9 +1,9 @@
-﻿using BookStoreMVC.DataAccess.Repository.IRepository;
+﻿using StudentStorage.DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using StudentStorage.DataAccess.Data;
 using StudentStorage.Models;
 
-namespace BookStoreMVC.DataAccess.Repository
+namespace StudentStorage.DataAccess.Repository
 {
     public class CourseRepository : Repository<Course>, ICourseRepository
     {

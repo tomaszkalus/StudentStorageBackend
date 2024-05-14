@@ -1,11 +1,11 @@
-﻿using BookStoreMVC.DataAccess.Repository.IRepository;
+﻿using StudentStorage.DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using StudentStorage.DataAccess.Data;
 using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
 using System.Linq.Expressions;
 
-namespace BookStoreMVC.DataAccess.Repository
+namespace StudentStorage.DataAccess.Repository
 {
     public class AssignmentRepository : Repository<Assignment>, IAssignmentRepository
     {

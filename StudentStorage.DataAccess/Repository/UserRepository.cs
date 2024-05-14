@@ -1,4 +1,4 @@
-﻿using BookStoreMVC.DataAccess.Repository;
+﻿using StudentStorage.DataAccess.Repository;
 using Microsoft.EntityFrameworkCore;
 using StudentStorage.DataAccess.Data;
 using StudentStorage.DataAccess.Repository.IRepository;

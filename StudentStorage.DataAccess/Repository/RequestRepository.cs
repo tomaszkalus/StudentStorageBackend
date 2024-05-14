@@ -1,12 +1,7 @@
-﻿using BookStoreMVC.DataAccess.Repository;
+﻿using Microsoft.EntityFrameworkCore;
 using StudentStorage.DataAccess.Data;
 using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudentStorage.DataAccess.Repository
 {
@@ -20,16 +15,19 @@ namespace StudentStorage.DataAccess.Repository
 
         public async Task<Request?> GetByIdAsync(int id)
         {
-            return await _db.Requests.FindAsync(id);
+            return await _db.Requests
+                .Include(r => r.Course)
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task UpdateAsync(Request request)
         {
-            Request? requestFromDb = await _db.Requests.FindAsync(request.Id);
-            if (requestFromDb != null)
+            var objFromDb = await _db.Requests.FirstOrDefaultAsync(s => s.Id == request.Id);
+            if (objFromDb != null)
             {
-                requestFromDb.Status = request.Status;
-                requestFromDb.UpdatedAt = DateTime.Now;
+                objFromDb.Status = request.Status;
+                objFromDb.UpdatedAt = DateTime.Now;
                 await _db.SaveChangesAsync();
             }
         }

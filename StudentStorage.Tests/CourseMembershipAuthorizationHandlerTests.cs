@@ -1,4 +1,4 @@
-﻿using BookStoreMVC.DataAccess.Repository.IRepository;
+﻿using StudentStorage.DataAccess.Repository.IRepository;
 using FakeItEasy;
 using Microsoft.AspNetCore.Authorization;
 using StudentStorage.Authorization;

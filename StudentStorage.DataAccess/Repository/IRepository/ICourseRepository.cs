@@ -1,6 +1,6 @@
 ﻿using StudentStorage.Models;
 
-namespace BookStoreMVC.DataAccess.Repository.IRepository
+namespace StudentStorage.DataAccess.Repository.IRepository
 {
     public interface ICourseRepository : IRepository<Course>
     {

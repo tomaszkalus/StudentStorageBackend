@@ -1,10 +1,10 @@
-﻿using BookStoreMVC.DataAccess.Repository.IRepository;
+﻿using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.DataAccess.Data;
 using StudentStorage.DataAccess.Repository;
 using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
 
-namespace BookStoreMVC.DataAccess.Repository
+namespace StudentStorage.DataAccess.Repository
 {
     public class UnitOfWork : IUnitOfWork
     {
@@ -30,21 +30,25 @@ namespace BookStoreMVC.DataAccess.Repository
 
         public async Task ApproveCourseRequestTransactionAsync(Request request)
         {
-            using (var transaction = _db.Database.BeginTransaction())
+            if (request == null)
             {
-                try
-                {
-                    await Request.UpdateAsync(request);
-                    await Course.UpdateAsync(request.Course);
-                    await SaveAsync();
-                    transaction.Commit();
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    throw new Exception("An error occurred while approving the course request", ex);
-                }
+                throw new ArgumentNullException(nameof(request), "Request cannot be null");
             }
+
+            var transaction = _db.Database.BeginTransaction();
+            try
+            {
+                _db.Requests.Update(request);
+                _db.Courses.Update(request.Course);
+                await transaction.CommitAsync();
+                
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception("An error occurred while approving the course request", ex);
+            }
+            
         }
     }
 }

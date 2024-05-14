@@ -1,4 +1,4 @@
-﻿using BookStoreMVC.DataAccess.Repository.IRepository;
+﻿using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
 using System;
 using System.Collections.Generic;
