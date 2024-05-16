@@ -1,15 +1,13 @@
 ﻿using AutoMapper;
-using StudentStorage.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
 using StudentStorage.Models.Authentication;
 using StudentStorage.Models.DTO;
 using StudentStorage.Models.Enums;
 using StudentStorage.Services;
-using System.Security.Claims;
-using StudentStorage.Models.Exceptions;
 
 namespace StudentStorage.Controllers
 {
@@ -52,7 +50,7 @@ namespace StudentStorage.Controllers
             {
                 return BadRequest();
             }
-            
+
             var authorizationResult = await _authorizationService
             .AuthorizeAsync(User, request.Course, "CourseCreatorPolicy");
 
@@ -60,11 +58,20 @@ namespace StudentStorage.Controllers
             {
                 return Forbid();
             }
-            
+
             RequestResponseDTO requestResponseDTO = _mapper.Map<RequestResponseDTO>(request);
             return Ok(requestResponseDTO);
         }
 
+        /// <summary>
+        /// Accept or deny a request. Only course authors can access this endpoint.
+        /// </summary>
+        /// <param name="id">
+        /// Request ID
+        /// </param>
+        /// <param name="status">
+        /// Status of the request (Approved or Denied)
+        /// </param>
         // PUT api/v1/Requests/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] CourseRequestStatus status)
@@ -74,17 +81,13 @@ namespace StudentStorage.Controllers
             {
                 return NotFound();
             }
-            try
+            var result = await _courseRequestService.UpdateRequestStatus(request, status);
+            if (!result.Success)
             {
-                await _courseRequestService.UpdateRequestStatus(request, status);
-            }
-
-            catch (Exception ex)
-            {
-                return BadRequest();
+                return BadRequest(result.Message);
             }
             return Ok();
-            
+
         }
     }
 }

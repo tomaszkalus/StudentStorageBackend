@@ -32,6 +32,5 @@ namespace StudentStorage.DataAccess.Repository
                 await _db.SaveChangesAsync();
             }
         }
-
     }
 }
