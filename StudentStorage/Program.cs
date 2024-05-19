@@ -1,13 +1,12 @@
-using StudentStorage.DataAccess.Repository;
-using StudentStorage.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using StudentStorage.Authorization;
 using StudentStorage.DataAccess.Data;
+using StudentStorage.DataAccess.Repository;
+using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
 using StudentStorage.Services;
 using System.Reflection;
@@ -21,13 +20,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
-    //.AddClaimsPrincipalFactory<UserClaimsPrincipalFactory<ApplicationUser, IdentityRole>>();
-
-//builder.Services.AddAuthorization(options =>
-//{
-//    options.AddPolicy("IsCourseMember", policy =>
-//        policy.Requirements.Add(new CourseMembershipAuthorizationRequirement()));
-//});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -47,13 +39,14 @@ builder.Services.AddAuthentication(options =>
          ValidateIssuerSigningKey = true,
          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"])),
          ValidAudience = configuration["JWT:ValidAudience"],
-         ValidIssuer = configuration["JWT:ValidIssuer"],  
+         ValidIssuer = configuration["JWT:ValidIssuer"],
      };
  });
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<CourseRequestService>();
+builder.Services.AddSingleton<CourseFileService>();
 
 
 

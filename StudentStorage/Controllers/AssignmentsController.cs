@@ -148,5 +148,10 @@ namespace StudentStorage.Controllers
             await _unitOfWork.SaveAsync();
             return Ok();
         }
+
+        // POST api/Assignments/5/Solutions
+
+        // GET api/Assignments/5/Solutions
+
     }
 }

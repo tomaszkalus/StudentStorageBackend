@@ -15,6 +15,7 @@ namespace StudentStorage.Models
         public string FilePath { get; set; }
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         // navigation properties
         [ForeignKey("AssignmentId")]

@@ -11,7 +11,7 @@ using StudentStorage.Models.Enums;
 
 namespace StudentStorage.Controllers
 {
-    [Route("v1/api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
