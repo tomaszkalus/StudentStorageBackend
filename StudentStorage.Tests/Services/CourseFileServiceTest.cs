@@ -14,7 +14,7 @@ namespace StudentStorage.Tests.Services
             // Arrange
             var courseId = 9;
             var courseName = "Współczesne Apki Webowe";
-            var courseCreator = new ApplicationUser { Id = "1", UserName = "test", FirstName = "Andrzej", LastName = "Nowak" };
+            var courseCreator = new ApplicationUser { Id = 1, UserName = "test", FirstName = "Andrzej", LastName = "Nowak" };
             var course = new Course { Id = courseId, Name = courseName, CreatedAt = DateTime.Now, Creator = courseCreator};
 
             var path = "C:\\Users\\tomas\\source\\repos\\StudentStorage\\UserFiles";
@@ -43,8 +43,10 @@ namespace StudentStorage.Tests.Services
             // Arrange
             var courseId = 9;
             var courseName = "Współczesne Apki Webowe";
-            var courseCreator = new ApplicationUser { Id = "1", UserName = "test", FirstName = "Andrzej", LastName = "Nowak" };
+            var courseCreator = new ApplicationUser { Id = 5, UserName = "test", FirstName = "Andrzej", LastName = "Nowak" };
+            var courseMember = new ApplicationUser { Id = 10, UserName = "test", FirstName = "Jan", LastName = "Kowalski" };
             var course = new Course { Id = courseId, Name = courseName, CreatedAt = DateTime.Now, Creator = courseCreator };
+            course.Students.Add(courseMember);
 
             var path = "C:\\Users\\tomas\\source\\repos\\StudentStorage\\UserFiles";
             var config = A.Fake<IConfiguration>();
@@ -53,20 +55,20 @@ namespace StudentStorage.Tests.Services
 
             var fileService = new CourseFileService(config);
             var courseDirName = fileService.GenerateCourseDirectoryName(course);
-            var expectedPath = Path.Combine(path, courseDirName, $"{courseCreator.LastName}_{courseCreator.FirstName}_{courseCreator.Id}");
+            var expectedPath = Path.Combine(path, courseDirName, $"{courseMember.LastName}_{courseMember.FirstName}_{courseMember.Id}");
 
             
             fileService.CreateCourseDirectory(course);
 
             // Act
             var sut = new CourseFileService(config);
-            sut.CreateStudentDirectory(course, courseCreator);
+            sut.CreateStudentDirectory(course, courseMember);
 
             // Assert
             Assert.True(Directory.Exists(expectedPath));
 
             // Clean up
-            Directory.Delete(expectedPath);
+            //Directory.Delete(expectedPath);
         }
     }
 }

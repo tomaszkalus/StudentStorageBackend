@@ -12,7 +12,7 @@ namespace StudentStorage.Models.DTO
     {
         public int Id { get; set; }
         public int CourseId { get; set; }
-        public string UserId { get; set; }
+        public int UserId { get; set; }
         public CourseRequestStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
     }

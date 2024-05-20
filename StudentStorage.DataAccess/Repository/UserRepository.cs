@@ -27,7 +27,7 @@ namespace StudentStorage.DataAccess.Repository
             }
         }
 
-        public async Task<IEnumerable<Course>> GetUserCreatedCoursesAsync(string userId)
+        public async Task<IEnumerable<Course>> GetUserCreatedCoursesAsync(int userId)
         {
             return await _db.Courses
                 .Include(c => c.Creator)
@@ -35,7 +35,7 @@ namespace StudentStorage.DataAccess.Repository
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Course>> GetCoursesAsync(string userId)
+        public async Task<IEnumerable<Course>> GetCoursesAsync(int userId)
         {
             return await _db.Courses
                 .Include(c => c.Students)
@@ -43,20 +43,20 @@ namespace StudentStorage.DataAccess.Repository
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Request>> GetRequestsAsync(string userId)
+        public async Task<IEnumerable<Request>> GetRequestsAsync(int userId)
         {
             return await _db.Requests
                 .Include(r => r.Course)
                 .Where(r => r.UserId == userId)
                 .ToListAsync();
         }
-        public async Task<bool> IsCourseMemberAsync(string userId, int courseId)
+        public async Task<bool> IsCourseMemberAsync(int userId, int courseId)
         {
             return await _db.Courses
                 .AnyAsync(c => c.Id == courseId && c.Students.Any(s => s.Id == userId));
         }
 
-        public async Task<bool> IsCourseAuthorAsync(string userId, int courseId)
+        public async Task<bool> IsCourseAuthorAsync(int userId, int courseId)
         {
             return await _db.Courses
                 .AnyAsync(c => c.Id == courseId && c.CreatorId == userId);

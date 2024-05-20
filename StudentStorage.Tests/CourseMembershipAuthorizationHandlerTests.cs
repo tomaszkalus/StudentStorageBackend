@@ -30,7 +30,7 @@ public class CourseMembershipAuthorizationHandlerTests
     public async Task HandleRequirementAsync_Succeeds_WhenUserIsCourseMember()
     {
         // Arrange
-        A.CallTo(() => _unitOfWork.User.IsCourseMemberAsync(_user.FindFirstValue(ClaimTypes.NameIdentifier), _course.Id))
+        A.CallTo(() => _unitOfWork.User.IsCourseMemberAsync(Int32.Parse(_user.FindFirstValue(ClaimTypes.NameIdentifier)), _course.Id))
             .Returns(true);
 
         var authContext = new AuthorizationHandlerContext(new[] { new CourseMembershipAuthorizationRequirement() }, _user, _course);
@@ -46,7 +46,7 @@ public class CourseMembershipAuthorizationHandlerTests
     public async Task HandleRequirementAsync_Fails_WhenUserIsNotCourseMember()
     {
         // Arrange
-        A.CallTo(() => _unitOfWork.User.IsCourseMemberAsync(_user.FindFirstValue(ClaimTypes.NameIdentifier), _course.Id))
+        A.CallTo(() => _unitOfWork.User.IsCourseMemberAsync(Int32.Parse(_user.FindFirstValue(ClaimTypes.NameIdentifier)), _course.Id))
             .Returns(false);
 
         var authContext = new AuthorizationHandlerContext(new[] { new CourseMembershipAuthorizationRequirement() }, _user, _course);

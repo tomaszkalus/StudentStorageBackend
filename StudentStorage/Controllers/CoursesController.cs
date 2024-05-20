@@ -194,7 +194,7 @@ namespace StudentStorage.Controllers
         [Authorize(Roles = UserRoles.Teacher)]
         public async Task<ActionResult> Post([FromBody] CourseRequestDTO courseDTO)
         {
-            string userId = _userManager.GetUserId(User);
+            int userId = Int32.Parse(_userManager.GetUserId(User));
             Course course = new Course
             {
                 CreatorId = userId,
@@ -227,7 +227,7 @@ namespace StudentStorage.Controllers
         public async Task<ActionResult> Put(int id, [FromBody] CourseRequestDTO courseDTO)
         {
             Course? course = await _unitOfWork.Course.GetByIdAsync(id);
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (course == null)
             {
                 return NotFound();
@@ -261,7 +261,7 @@ namespace StudentStorage.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             Course? course = await _unitOfWork.Course.GetByIdAsync(id);
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (course == null)
             {
                 return NotFound();

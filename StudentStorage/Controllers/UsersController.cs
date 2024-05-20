@@ -42,7 +42,7 @@ namespace StudentStorage.Controllers
         [Authorize(Roles = UserRoles.Student)]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> GetUserCourses(string userId)
+        public async Task<IActionResult> GetUserCourses(int userId)
         {
             ApplicationUser user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
@@ -59,7 +59,7 @@ namespace StudentStorage.Controllers
         [Authorize(Roles = UserRoles.Student)]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> GetUserRequests(string userId)
+        public async Task<IActionResult> GetUserRequests(int userId)
         {
             ApplicationUser user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)

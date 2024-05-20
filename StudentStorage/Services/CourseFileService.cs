@@ -21,7 +21,7 @@ namespace StudentStorage.Services
         {
             string normalizedCourseName = course.Name.Replace(" ", "_");
             string courseCreatedYear = course.CreatedAt.Year.ToString();
-            return $"{course.Id}_{course.Creator.FirstName}_{course.Creator.LastName}_{normalizedCourseName}_{courseCreatedYear}";
+            return $"{course.Creator.FirstName}_{course.Creator.LastName}_{normalizedCourseName}_{courseCreatedYear}_{course.Id}";
         }
 
         public ServiceResult CreateCourseDirectory(Course course)
@@ -45,7 +45,7 @@ namespace StudentStorage.Services
         private string? GetCourseDirectoryById(int courseId)
         {
             string[] directories = Directory.GetDirectories(_basePath);
-            return directories.FirstOrDefault(dir => Path.GetFileName(dir).StartsWith(courseId.ToString()));
+            return directories.FirstOrDefault(dir => Path.GetFileName(dir).EndsWith(courseId.ToString()));
         }
 
         public ServiceResult DeleteCourseDirectory(Course course)
@@ -71,7 +71,7 @@ namespace StudentStorage.Services
             if (courseDirectory != null)
             {
                 string directoryName = $"{user.LastName}_{user.FirstName}_{user.Id}";
-                string studentDirectory = Path.Combine(courseDirectory, user.Id);
+                string studentDirectory = Path.Combine(courseDirectory, directoryName);
                 if (!Directory.Exists(studentDirectory))
                 {
                     try
@@ -86,7 +86,6 @@ namespace StudentStorage.Services
                 return new ServiceResult(true, "Student directory created successfully.");
             }
             return new ServiceResult(false, "Course directory does not exist.");
-
         }
 
     }

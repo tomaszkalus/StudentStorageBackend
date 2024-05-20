@@ -16,7 +16,7 @@ namespace StudentStorage.Authorization
             CourseMembershipAuthorizationRequirement requirement,
             Course course)
         {
-            var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int userId = Int32.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier)); 
             if (userId != null && (await _unitOfWork.User.IsCourseMemberAsync(userId, course.Id)))
             {
                 context.Succeed(requirement);

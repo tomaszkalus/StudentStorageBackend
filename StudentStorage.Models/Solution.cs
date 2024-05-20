@@ -10,7 +10,7 @@ namespace StudentStorage.Models
     public class Solution
     {
         public int Id { get; set; }
-        public string CreatorId { get; set; }
+        public int CreatorId { get; set; }
         public int AssignmentId { get; set; }
         public string FilePath { get; set; }
         public string Description { get; set; }

@@ -16,7 +16,7 @@ namespace StudentStorage.Authorization
             CourseCreatorAuthorizationRequirement requirement, 
             Course resource)
         {
-            var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int userId = Int32.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (userId != null && (userId == resource.CreatorId))
             {
                 context.Succeed(requirement);

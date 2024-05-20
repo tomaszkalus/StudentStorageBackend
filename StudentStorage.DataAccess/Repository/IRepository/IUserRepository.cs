@@ -5,10 +5,10 @@ namespace StudentStorage.DataAccess.Repository.IRepository
 {
     public interface IUserRepository : IRepository<ApplicationUser>
     {
-        Task<IEnumerable<Course>> GetUserCreatedCoursesAsync(string userId);
-        Task<IEnumerable<Request>> GetRequestsAsync(string userId);
-        Task<IEnumerable<Course>> GetCoursesAsync(string userId);
-        Task<bool> IsCourseMemberAsync(string userId, int courseId);
-        Task<bool> IsCourseAuthorAsync(string userId, int courseId);
+        Task<IEnumerable<Course>> GetUserCreatedCoursesAsync(int userId);
+        Task<IEnumerable<Request>> GetRequestsAsync(int userId);
+        Task<IEnumerable<Course>> GetCoursesAsync(int userId);
+        Task<bool> IsCourseMemberAsync(int userId, int courseId);
+        Task<bool> IsCourseAuthorAsync(int userId, int courseId);
     }
 }
