@@ -11,6 +11,7 @@ namespace StudentStorage.DataAccess.Repository.IRepository
         IUserRepository User { get; }
 
         Task ApproveCourseRequestTransactionAsync(Request request);
+        Task DisposeAsync();
         Task SaveAsync();
     }
 }

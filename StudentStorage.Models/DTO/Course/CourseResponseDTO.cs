@@ -1,4 +1,6 @@
-﻿namespace StudentStorage.Models.DTO
+﻿using StudentStorage.Models.DTO.User;
+
+namespace StudentStorage.Models.DTO.Course
 {
     public class CourseResponseDTO
     {

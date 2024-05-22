@@ -7,13 +7,41 @@ namespace StudentStorage.Services
     public class CourseRequestService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly FileManagerService _fileManagerService;
 
-        public CourseRequestService(IUnitOfWork unitOfWork)
+        public CourseRequestService(IUnitOfWork unitOfWork, FileManagerService fileManagerService)
         {
             _unitOfWork = unitOfWork;
+            _fileManagerService = fileManagerService;
         }
 
-            public async Task<ServiceResult> UpdateRequestStatus(Request request, CourseRequestStatus status)
+        public async Task<ServiceResult> ApproveCourseRequestAsync(Request request)
+        {
+            try
+            {
+                request.Course.Students.Add(request.User);
+                await _unitOfWork.Request.UpdateAsync(request);
+                await _unitOfWork.Course.UpdateAsync(request.Course);
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.DisposeAsync();
+                return new ServiceResult(false, ex.Message);
+            }
+
+            ServiceResult result = _fileManagerService.CreateStudentDirectory(request.Course, request.User);
+            if (!result.Success)
+            {
+                await _unitOfWork.DisposeAsync();
+                return new ServiceResult(false, result.Message);
+            }
+
+            await _unitOfWork.SaveAsync();
+            return new ServiceResult(true, "User directory created successfully.");
+        }
+
+
+        public async Task<ServiceResult> UpdateRequestStatus(Request request, CourseRequestStatus status)
         {
             if (request == null)
             {
@@ -34,8 +62,7 @@ namespace StudentStorage.Services
             {
                 if (status == CourseRequestStatus.Approved)
                 {
-                    request.Course.Students.Add(request.User);
-                    await _unitOfWork.ApproveCourseRequestTransactionAsync(request);
+                    await ApproveCourseRequestAsync(request);
                 }
                 else if (status == CourseRequestStatus.Denied)
                 {

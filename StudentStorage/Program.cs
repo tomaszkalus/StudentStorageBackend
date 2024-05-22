@@ -46,16 +46,13 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<CourseRequestService>();
-builder.Services.AddSingleton<CourseFileService>();
-
-
+builder.Services.AddSingleton<FileManagerService>();
 
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("CourseMembershipPolicy", policy =>
     {
         policy.Requirements.Add(new CourseMembershipAuthorizationRequirement());
-        policy.Requirements.Add(new CourseCreatorAuthorizationRequirement());
     });
 
     options.AddPolicy("CourseCreatorPolicy", policy =>

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using StudentStorage.Models;
 using System.Security.Claims;
+using System.Reflection;
 
 namespace StudentStorage.Authorization
 {
@@ -16,8 +17,15 @@ namespace StudentStorage.Authorization
             CourseMembershipAuthorizationRequirement requirement,
             Course course)
         {
+            string? userIdString = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdString == null)
+            {
+                context.Fail();
+                return Task.CompletedTask;
+            }
+
             int userId = Int32.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier)); 
-            if (userId != null && (await _unitOfWork.User.IsCourseMemberAsync(userId, course.Id)))
+            if (await _unitOfWork.User.IsCourseMemberAsync(userId, course.Id) || userId == course.CreatorId)
             {
                 context.Succeed(requirement);
             }

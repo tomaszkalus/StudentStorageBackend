@@ -8,6 +8,9 @@ using StudentStorage.Models.Authentication;
 using StudentStorage.Models.DTO;
 using StudentStorage.Models.Enums;
 using System.Security.Claims;
+using StudentStorage.Models.DTO.Course;
+using StudentStorage.Models.DTO.Request;
+using StudentStorage.Services;
 
 namespace StudentStorage.Controllers
 {
@@ -20,13 +23,15 @@ namespace StudentStorage.Controllers
         UserManager<ApplicationUser> _userManager;
         IMapper _mapper;
         IAuthorizationService _authorizationService;
+        FileManagerService _fileManagerService;
 
-        public CoursesController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IAuthorizationService authorizationService)
+        public CoursesController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IAuthorizationService authorizationService, FileManagerService fileManagerService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
             _authorizationService = authorizationService;
+            _fileManagerService = fileManagerService;
         }
 
         /// <summary>
@@ -204,6 +209,15 @@ namespace StudentStorage.Controllers
             };
             await _unitOfWork.Course.AddAsync(course);
             await _unitOfWork.SaveAsync();
+            course.Creator = await _userManager.FindByIdAsync(userId.ToString());
+            var serviceResult = _fileManagerService.CreateCourseDirectory(course);
+            if (!serviceResult.Success)
+            {
+                await _unitOfWork.Course.RemoveAsync(course);
+                await _unitOfWork.SaveAsync();
+                return BadRequest();
+            }
+            
             CourseResponseDTO courseResponseDTO = _mapper.Map<CourseResponseDTO>(course);
             return Ok(courseResponseDTO);
         }

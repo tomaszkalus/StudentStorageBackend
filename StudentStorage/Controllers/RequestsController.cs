@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
 using StudentStorage.Models.Authentication;
-using StudentStorage.Models.DTO;
+using StudentStorage.Models.DTO.Request;
 using StudentStorage.Models.Enums;
 using StudentStorage.Services;
 
@@ -21,14 +21,16 @@ namespace StudentStorage.Controllers
         IMapper _mapper;
         CourseRequestService _courseRequestService;
         IAuthorizationService _authorizationService;
+        FileManagerService _fileManagerService;
 
-        public RequestsController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, CourseRequestService courseRequestService, IAuthorizationService authorizationService)
+        public RequestsController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, CourseRequestService courseRequestService, IAuthorizationService authorizationService, FileManagerService fileManagerService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
             _courseRequestService = courseRequestService;
             _authorizationService = authorizationService;
+            _fileManagerService = fileManagerService;
         }
 
         /// <summary>
@@ -48,7 +50,7 @@ namespace StudentStorage.Controllers
             Request? request = await _unitOfWork.Request.GetByIdAsync(id);
             if (request == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             var authorizationResult = await _authorizationService
@@ -86,6 +88,13 @@ namespace StudentStorage.Controllers
             {
                 return BadRequest(result.Message);
             }
+            if(status == CourseRequestStatus.Approved)
+            {
+                ApplicationUser user = await _userManager.FindByIdAsync(request.UserId.ToString());
+                _fileManagerService.CreateStudentDirectory(request.Course, user);
+            }
+            
+
             return Ok();
 
         }

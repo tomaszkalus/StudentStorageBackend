@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
 using StudentStorage.Models.DTO;
+using StudentStorage.Models.DTO.Course;
+using StudentStorage.Models.DTO.Request;
+using StudentStorage.Models.DTO.User;
 
 namespace StudentStorage.Models
 {
@@ -20,7 +23,9 @@ namespace StudentStorage.Models
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.Creator));
 
-            CreateMap<Request, RequestResponseDTO>();
+            CreateMap<Request, RequestResponseDTO>()
+                .ForMember(dest => dest.StatusDescription, opt => opt.MapFrom(src => src.Status.ToString()));
+
             CreateMap<Assignment, AssignmentResponseDTO>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))

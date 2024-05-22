@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using StudentStorage.Models;
 using StudentStorage.Models.Authentication;
-using StudentStorage.Models.DTO;
 using StudentStorage.Models.Enums;
+using StudentStorage.Models.DTO.Course;
+using StudentStorage.Models.DTO.Request;
+using StudentStorage.Models.DTO.User;
 
 namespace StudentStorage.Controllers
 {

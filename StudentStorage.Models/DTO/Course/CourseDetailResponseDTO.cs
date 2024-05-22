@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StudentStorage.Models.DTO
+namespace StudentStorage.Models.DTO.Course
 {
     public class CourseDetailResponseDTO : CourseResponseDTO
     {

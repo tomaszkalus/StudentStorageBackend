@@ -1,4 +1,4 @@
-﻿namespace StudentStorage.Models.DTO
+﻿namespace StudentStorage.Models.DTO.User
 {
     public class UserDTO
     {

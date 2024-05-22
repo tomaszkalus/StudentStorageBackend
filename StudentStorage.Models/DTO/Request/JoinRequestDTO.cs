@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StudentStorage.Models.DTO
+namespace StudentStorage.Models.DTO.Request
 {
     public class JoinRequestDTO
     {

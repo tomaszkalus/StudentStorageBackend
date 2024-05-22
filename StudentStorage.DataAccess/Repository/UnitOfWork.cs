@@ -28,6 +28,12 @@ namespace StudentStorage.DataAccess.Repository
             await _db.SaveChangesAsync();
         }
 
+        public async Task DisposeAsync()
+        {
+            await _db.DisposeAsync();
+            return;
+        }
+
         public async Task ApproveCourseRequestTransactionAsync(Request request)
         {
             if (request == null)
@@ -41,6 +47,7 @@ namespace StudentStorage.DataAccess.Repository
                 _db.Requests.Update(request);
                 _db.Courses.Update(request.Course);
                 await transaction.CommitAsync();
+                await _db.SaveChangesAsync();
                 
             }
             catch (Exception ex)

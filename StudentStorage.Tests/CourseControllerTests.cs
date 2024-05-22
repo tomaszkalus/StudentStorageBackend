@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using StudentStorage.Controllers;
 using StudentStorage.Models;
-using StudentStorage.Models.DTO;
 using System.Security.Claims;
+using StudentStorage.Models.DTO.Course;
 
 namespace StudentStorage.Tests
 {

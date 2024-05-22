@@ -12,12 +12,19 @@ namespace StudentStorage.Authorization
         {
             _unitOfWork = unitOfWork;
         }
-        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, 
+        protected async override Task<Task> HandleRequirementAsync(AuthorizationHandlerContext context, 
             CourseCreatorAuthorizationRequirement requirement, 
             Course resource)
         {
+            string? userIdString = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdString == null)
+            {
+                context.Fail();
+                return Task.CompletedTask;
+            }
+
             int userId = Int32.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier));
-            if (userId != null && (userId == resource.CreatorId))
+            if (userId == resource.CreatorId)
             {
                 context.Succeed(requirement);
             }

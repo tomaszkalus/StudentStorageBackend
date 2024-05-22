@@ -17,7 +17,6 @@ namespace StudentStorage.DataAccess.Repository
         public async Task AddAsync(T entity)
         {
             dbSet.Add(entity);
-            await _db.SaveChangesAsync();
         }
 
         public async Task<T?> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null)

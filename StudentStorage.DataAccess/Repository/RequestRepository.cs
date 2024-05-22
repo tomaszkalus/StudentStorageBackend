@@ -28,7 +28,6 @@ namespace StudentStorage.DataAccess.Repository
             {
                 objFromDb.Status = request.Status;
                 objFromDb.UpdatedAt = DateTime.Now;
-                await _db.SaveChangesAsync();
             }
         }
     }

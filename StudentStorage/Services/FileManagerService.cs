@@ -2,19 +2,24 @@
 
 namespace StudentStorage.Services
 {
-    public class CourseFileService
+    public class FileManagerService
     {
         private readonly string _basePath;
-        public CourseFileService(IConfiguration configuration)
+        public FileManagerService(IConfiguration configuration)
         {
             try
             {
-                _basePath = configuration["CourseFiles:BasePath"];
+                _basePath = configuration["UserFiles:AbsolutePath"];
             }
             catch (Exception e)
             {
                 throw new Exception("Could not read base path from configuration", e);
             }
+        }
+
+        public string GenerateUserDirectoryName(ApplicationUser user)
+        {
+            return $"{user.LastName}_{user.FirstName}_{user.Id}";
         }
 
         public string GenerateCourseDirectoryName(Course course)
@@ -38,6 +43,7 @@ namespace StudentStorage.Services
                 {
                     return new ServiceResult(false, e.Message);
                 }
+                return new ServiceResult(true, "Directory created successfully");
             }
             return new ServiceResult(false, "Directory already exists");
         }
@@ -70,7 +76,7 @@ namespace StudentStorage.Services
             string courseDirectory = GetCourseDirectoryById(course.Id);
             if (courseDirectory != null)
             {
-                string directoryName = $"{user.LastName}_{user.FirstName}_{user.Id}";
+                string directoryName = GenerateUserDirectoryName(user);
                 string studentDirectory = Path.Combine(courseDirectory, directoryName);
                 if (!Directory.Exists(studentDirectory))
                 {
@@ -87,6 +93,5 @@ namespace StudentStorage.Services
             }
             return new ServiceResult(false, "Course directory does not exist.");
         }
-
     }
 }
