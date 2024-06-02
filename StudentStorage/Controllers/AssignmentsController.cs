@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using StudentStorage.Models;
 using StudentStorage.Models.Authentication;
 using StudentStorage.Models.DTO;
+using StudentStorage.Models.DTO.Solution;
+using StudentStorage.Services;
 
 namespace StudentStorage.Controllers
 {
@@ -16,13 +18,19 @@ namespace StudentStorage.Controllers
         IUnitOfWork _unitOfWork;
         UserManager<ApplicationUser> _userManager;
         IMapper _mapper;
+        AssignmentSolutionService _assignmentSolutionService;
+        IAuthorizationService _authorizationService;
 
-        public AssignmentsController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper)
+        public AssignmentsController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, AssignmentSolutionService assignmentSolutionService, IAuthorizationService authorizationService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
+            _assignmentSolutionService = assignmentSolutionService;
+            _authorizationService = authorizationService;
         }
+
+        #region Assignment
 
         /// <summary>
         /// Gets all assignments.
@@ -63,37 +71,6 @@ namespace StudentStorage.Controllers
         }
 
         /// <summary>
-        /// Creates a new assignment.
-        /// </summary>
-        /// <param name="AssignmentDTO">
-        /// Assignment object.
-        /// </param>
-        /// <returns>
-        /// Returns the created assignment.</returns>
-        /// <response code="200">Returns the created assignment.</response>
-        // POST api/Assignments
-        [HttpPost]
-        [Authorize(Roles = UserRoles.Teacher)]
-        public async Task<ActionResult> Post([FromBody] AssignmentRequestDTO AssignmentDTO)
-        {
-            Assignment Assignment = new Assignment
-            {
-                CourseId = AssignmentDTO.CourseId,
-                Title = AssignmentDTO.Title,
-                Description = AssignmentDTO.Description,
-                DueDate = AssignmentDTO.DueDate,
-                AllowLateSubmissions = AssignmentDTO.AllowLateSubmissions,
-                Hidden = AssignmentDTO.Hidden,
-                CreatedAt = DateTime.Now
-            };
-
-            await _unitOfWork.Assignment.AddAsync(Assignment);
-            await _unitOfWork.SaveAsync();
-            AssignmentResponseDTO AssignmentResponseDTO = _mapper.Map<AssignmentResponseDTO>(Assignment);
-            return Ok(AssignmentResponseDTO);
-        }
-
-        /// <summary>
         /// Updates an assignment.
         /// </summary>
         /// <param name="id">
@@ -120,7 +97,7 @@ namespace StudentStorage.Controllers
             Assignment.Hidden = AssignmentDTO.Hidden;
 
             await _unitOfWork.Assignment.UpdateAsync(Assignment);
-            await _unitOfWork.SaveAsync();
+            await _unitOfWork.CommitAsync();
             AssignmentResponseDTO AssignmentResponseDTO = _mapper.Map<AssignmentResponseDTO>(Assignment);
             return Ok(AssignmentResponseDTO);
         }
@@ -145,13 +122,47 @@ namespace StudentStorage.Controllers
                 return NotFound();
             }
             await _unitOfWork.Assignment.RemoveAsync(Assignment);
-            await _unitOfWork.SaveAsync();
+            await _unitOfWork.CommitAsync();
             return Ok();
         }
 
+        #endregion Assignment
+        #region Solution
+
         // POST api/Assignments/5/Solutions
+        [HttpPost("{id}/Solutions")]
+        [Authorize(Roles = UserRoles.Student)]
+        public async Task<IActionResult> AddSolution(int id, [FromForm] SolutionRequestDTO SolutionDTO)
+        {
+            Assignment? assignment = await _unitOfWork.Assignment.GetByIdAsync(id);
+            if (assignment == null)
+            {
+                return BadRequest();
+            }
+
+            var authorizationResult = await _authorizationService
+            .AuthorizeAsync(User, assignment.Course, "CourseMembershipPolicy");
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            var result = await _assignmentSolutionService.SubmitAssignmentSolutionAsync(SolutionDTO, assignment, currentUser);
+
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok();
+        }
 
         // GET api/Assignments/5/Solutions
+
+        #endregion Solution
+
+
 
     }
 }

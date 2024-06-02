@@ -19,6 +19,7 @@ namespace StudentStorage.DataAccess.Repository
                 .Include(c => c.Creator)
                 .Include(c => c.Students)
                 .Include(c => c.Assignments)
+                .Include(c => c.Requests)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 

@@ -1,21 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StudentStorage.Models.DTO
+﻿namespace StudentStorage.Models.DTO
 {
     /// <summary>
     /// DTO for sending Assignment requests
     /// </summary>
     public class AssignmentRequestDTO
     {
-        /// <summary>
-        /// Course ID
-        /// </summary>
-        public int CourseId { get; set; }
         /// <summary>
         /// Assignment title
         /// </summary>

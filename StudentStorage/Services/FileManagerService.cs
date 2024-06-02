@@ -5,7 +5,8 @@ namespace StudentStorage.Services
     public class FileManagerService
     {
         private readonly string _basePath;
-        public FileManagerService(IConfiguration configuration)
+        private readonly DirectoryService _directoryService;
+        public FileManagerService(IConfiguration configuration, DirectoryService directoryService)
         {
             try
             {
@@ -15,83 +16,41 @@ namespace StudentStorage.Services
             {
                 throw new Exception("Could not read base path from configuration", e);
             }
+            _directoryService = directoryService;
         }
 
-        public string GenerateUserDirectoryName(ApplicationUser user)
+        private byte[]? GetUserSolutionFile(Solution solution)
         {
-            return $"{user.LastName}_{user.FirstName}_{user.Id}";
+            var path = Path.Combine(_basePath, solution.FilePath);
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+            return File.ReadAllBytes(path);
         }
 
-        public string GenerateCourseDirectoryName(Course course)
+        public string? AddAssignmentSolutionFiles(IFormFile file, Assignment assignment, ApplicationUser user)
         {
-            string normalizedCourseName = course.Name.Replace(" ", "_");
-            string courseCreatedYear = course.CreatedAt.Year.ToString();
-            return $"{course.Creator.FirstName}_{course.Creator.LastName}_{normalizedCourseName}_{courseCreatedYear}_{course.Id}";
-        }
-
-        public ServiceResult CreateCourseDirectory(Course course)
-        {
-            string courseFolderName = GenerateCourseDirectoryName(course);
-            string path = Path.Combine(_basePath, courseFolderName);
-            if (!Directory.Exists(path))
+            string? assignmentDirectory = _directoryService.GetAssignmentDirectory(assignment.CourseId, user.Id, assignment);
+            if (assignmentDirectory == null || !Directory.Exists(assignmentDirectory))
             {
                 try
                 {
-                    Directory.CreateDirectory(path);
+                    assignmentDirectory = _directoryService.CreateStudentAssignmentDirectory(user.Id, assignment);
                 }
                 catch (Exception e)
                 {
-                    return new ServiceResult(false, e.Message);
+                    throw new Exception("Could not create assignment directory", e);
                 }
-                return new ServiceResult(true, "Directory created successfully");
             }
-            return new ServiceResult(false, "Directory already exists");
-        }
 
-        private string? GetCourseDirectoryById(int courseId)
-        {
-            string[] directories = Directory.GetDirectories(_basePath);
-            return directories.FirstOrDefault(dir => Path.GetFileName(dir).EndsWith(courseId.ToString()));
-        }
-
-        public ServiceResult DeleteCourseDirectory(Course course)
-        {
-            string courseDirectory = GetCourseDirectoryById(course.Id);
-            if (courseDirectory != null)
+            var filePath = Path.Combine(assignmentDirectory, file.FileName);
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
             {
-                try
-                {
-                    Directory.Delete(courseDirectory, true);
-                }
-                catch (Exception e)
-                {
-                    return new ServiceResult(false, e.Message);
-                }
+                file.CopyTo(fileStream);
             }
-            return new ServiceResult(false, "Course directory does not exist.");
-        }
 
-        public ServiceResult CreateStudentDirectory(Course course, ApplicationUser user)
-        {
-            string courseDirectory = GetCourseDirectoryById(course.Id);
-            if (courseDirectory != null)
-            {
-                string directoryName = GenerateUserDirectoryName(user);
-                string studentDirectory = Path.Combine(courseDirectory, directoryName);
-                if (!Directory.Exists(studentDirectory))
-                {
-                    try
-                    {
-                        Directory.CreateDirectory(studentDirectory);
-                    }
-                    catch (Exception e)
-                    {
-                        return new ServiceResult(false, e.Message);
-                    }
-                }
-                return new ServiceResult(true, "Student directory created successfully.");
-            }
-            return new ServiceResult(false, "Course directory does not exist.");
+            return filePath;
         }
     }
 }

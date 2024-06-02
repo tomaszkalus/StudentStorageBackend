@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
@@ -17,20 +16,16 @@ namespace StudentStorage.Controllers
     {
 
         IUnitOfWork _unitOfWork;
-        UserManager<ApplicationUser> _userManager;
         IMapper _mapper;
         CourseRequestService _courseRequestService;
         IAuthorizationService _authorizationService;
-        FileManagerService _fileManagerService;
 
-        public RequestsController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, CourseRequestService courseRequestService, IAuthorizationService authorizationService, FileManagerService fileManagerService)
+        public RequestsController(IUnitOfWork unitOfWork, IMapper mapper, CourseRequestService courseRequestService, IAuthorizationService authorizationService)
         {
             _unitOfWork = unitOfWork;
-            _userManager = userManager;
             _mapper = mapper;
             _courseRequestService = courseRequestService;
             _authorizationService = authorizationService;
-            _fileManagerService = fileManagerService;
         }
 
         /// <summary>
@@ -55,7 +50,6 @@ namespace StudentStorage.Controllers
 
             var authorizationResult = await _authorizationService
             .AuthorizeAsync(User, request.Course, "CourseCreatorPolicy");
-
             if (!authorizationResult.Succeeded)
             {
                 return Forbid();
@@ -83,20 +77,13 @@ namespace StudentStorage.Controllers
             {
                 return NotFound();
             }
+
             var result = await _courseRequestService.UpdateRequestStatus(request, status);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
-            if(status == CourseRequestStatus.Approved)
-            {
-                ApplicationUser user = await _userManager.FindByIdAsync(request.UserId.ToString());
-                _fileManagerService.CreateStudentDirectory(request.Course, user);
-            }
-            
-
             return Ok();
-
         }
     }
 }

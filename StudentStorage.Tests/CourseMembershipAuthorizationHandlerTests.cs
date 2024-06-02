@@ -21,7 +21,7 @@ public class CourseMembershipAuthorizationHandlerTests
 
         _user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
         {
-            new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+            new Claim(ClaimTypes.NameIdentifier, "25"),
         }));
         _course = new Course { Id = 5 };
     }
@@ -56,5 +56,29 @@ public class CourseMembershipAuthorizationHandlerTests
 
         // Assert
         Assert.False(authContext.HasSucceeded);
+    }
+
+    [Fact]
+    public async Task HandleRequirementAsync_Succeeds_WhenUserIsCourseAuthor()
+    {
+        // Arrange
+        ClaimsPrincipal user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, "25"),
+        }));
+
+        Course course = new Course { Id = 5, CreatorId = 25 };
+        
+        A.CallTo(() => _unitOfWork.User.IsCourseMemberAsync(Int32.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)), course.Id))
+            .Returns(false);
+
+        var authContext = new AuthorizationHandlerContext(new[] { new CourseMembershipAuthorizationRequirement() }, user, course);
+
+        // Act
+        await _handler.HandleAsync(authContext);
+
+        // Assert
+        Assert.True(authContext.HasSucceeded);
+
     }
 }

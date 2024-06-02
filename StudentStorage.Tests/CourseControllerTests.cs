@@ -28,7 +28,7 @@ namespace StudentStorage.Tests
             _userManager = A.Fake<UserManager<ApplicationUser>>();
             _mapper = A.Fake<IMapper>();
             _authorizationService = A.Fake<IAuthorizationService>();
-            _controller = new CoursesController(_unitOfWork, _userManager, _mapper, _authorizationService);
+            //_controller = new CoursesController(_unitOfWork, _userManager, _mapper, _authorizationService);
 
             // Create a ClaimsPrincipal with the claims you want
             var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, "test-user-id") };

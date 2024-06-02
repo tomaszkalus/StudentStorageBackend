@@ -9,9 +9,10 @@ namespace StudentStorage.DataAccess.Repository.IRepository
         IAssignmentRepository Assignment { get; }
         IRequestRepository Request { get; }
         IUserRepository User { get; }
+        ISolutionRepository Solution { get; }
 
-        Task ApproveCourseRequestTransactionAsync(Request request);
-        Task DisposeAsync();
-        Task SaveAsync();
+        Task BeginTransactionAsync();
+        Task CommitAsync();
+        Task Rollback();
     }
 }

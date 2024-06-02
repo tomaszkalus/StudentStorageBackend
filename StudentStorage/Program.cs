@@ -46,7 +46,10 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<CourseRequestService>();
-builder.Services.AddSingleton<FileManagerService>();
+builder.Services.AddScoped<CourseService>();
+builder.Services.AddScoped<AssignmentSolutionService>();
+builder.Services.AddScoped<FileManagerService>();
+builder.Services.AddScoped<DirectoryService>();
 
 builder.Services.AddAuthorization(options =>
 {
