@@ -148,7 +148,7 @@ namespace StudentStorage.Controllers
             }
 
             var currentUser = await _userManager.GetUserAsync(User);
-            var result = await _assignmentSolutionService.SubmitAssignmentSolutionAsync(SolutionDTO, assignment, currentUser);
+            var result = await _assignmentSolutionService.SubmitAssignmentSolutionFilesAsync(SolutionDTO, assignment, currentUser);
 
             if (!result.Success)
             {
@@ -159,6 +159,46 @@ namespace StudentStorage.Controllers
         }
 
         // GET api/Assignments/5/Solutions
+        [HttpGet("{id}/Solutions")]
+        [Authorize(Roles = UserRoles.Student)]
+        public async Task<IActionResult> GetSolutions(int id)
+        {
+            Assignment? assignment = await _unitOfWork.Assignment.GetByIdAsync(id);
+            if (assignment == null)
+            {
+                return BadRequest();
+            }
+
+            var authorizationResult = await _authorizationService
+            .AuthorizeAsync(User, assignment.Course, "CourseMembershipPolicy");
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            var solutions = await _unitOfWork.Solution.GetAllUserAssignmentSolutions(id, currentUser.Id);
+
+            IEnumerable<SolutionResponseDTO> solutionResponseDTOs = solutions.Select(e =>
+            {
+                return new SolutionResponseDTO
+                {
+                    Id = e.Id,
+                    SizeMb = e.SizeMb,
+                    FileName = Path.GetFileName(e.FilePath)
+                };
+            });
+            return Ok(solutionResponseDTOs);
+        }
+
+        // DELETE api/Assignments/5/Solutions/1
+        [HttpDelete("{id}/Solutions/{solutionId}")]
+        [Authorize(Roles = UserRoles.Student)]
+        public async Task<IActionResult> DeleteSolution(int id, int solutionId)
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
 
         #endregion Solution
 

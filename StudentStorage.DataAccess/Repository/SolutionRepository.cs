@@ -24,11 +24,16 @@ namespace StudentStorage.DataAccess.Repository
             var objFromDb = await _db.Solutions.FirstOrDefaultAsync(s => s.Id == solution.Id);
             if (objFromDb != null)
             {
-                objFromDb.Description = solution.Description;
                 objFromDb.FilePath = solution.FilePath;
-                objFromDb.UpdatedAt = DateTime.Now;
                 await _db.SaveChangesAsync();
             }
+        }
+
+        public async Task<IEnumerable<Solution>> GetAllUserAssignmentSolutions(int assignmentId, int userId)
+        {
+            return await _db.Solutions
+                .Where(s => s.AssignmentId == assignmentId && s.CreatorId == userId)
+                .ToListAsync();
         }
 
     }

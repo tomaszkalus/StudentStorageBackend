@@ -15,25 +15,21 @@ namespace StudentStorage.Services
             _fileManagerService = fileManagerService;
         }
 
-        public async Task<ServiceResult> SubmitAssignmentSolutionAsync(SolutionRequestDTO solutionRequest, Assignment assignment, ApplicationUser user)
+        public async Task<ServiceResult> SubmitAssignmentSolutionFilesAsync(SolutionRequestDTO solutionRequest, Assignment assignment, ApplicationUser user)
         {
-            string? filePath = _fileManagerService.AddAssignmentSolutionFiles(solutionRequest.File, assignment, user);
-            if (filePath == null)
+            
+            var solutions = _fileManagerService.SaveSolutionFiles(solutionRequest.Files, assignment, user);
+
+            if (solutions == null)
             {
-                return new ServiceResult(false, "Could not save solution files.");
+                return new ServiceResult(false, "Failed to save solution files.");
             }
 
-            Solution solution = new Solution
+            foreach(var solution in solutions)
             {
-                CreatorId = user.Id,
-                AssignmentId = assignment.Id,
-                FilePath = filePath,
-                Description = solutionRequest.Description,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
-            };
+                await _unitOfWork.Solution.AddAsync(solution);
+            }
 
-            await _unitOfWork.Solution.AddAsync(solution);
             await _unitOfWork.CommitAsync();
 
             return new ServiceResult(true, "Assignment solution submitted successfully.");

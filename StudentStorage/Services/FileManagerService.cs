@@ -29,28 +29,72 @@ namespace StudentStorage.Services
             return File.ReadAllBytes(path);
         }
 
-        public string? AddAssignmentSolutionFiles(IFormFile file, Assignment assignment, ApplicationUser user)
+        private string? SaveFile(IFormFile file, string directory)
+        {
+            var fileName = DirectoryNameBuilderService.RemoveInvalidFilenameCharacters(file.FileName);
+            var filePath = Path.Combine(directory, fileName);
+
+            if (file.Length == 0)
+            {
+                throw new Exception("File is empty");
+            }
+            if (File.Exists(filePath))
+            {
+                throw new Exception("File already exists");
+            }
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {    
+                file.CopyTo(fileStream);
+            }
+            return filePath;
+        }
+
+        private string GetOrCreateAssignmentDirectory(Assignment assignment, ApplicationUser user)
         {
             string? assignmentDirectory = _directoryService.GetAssignmentDirectory(assignment.CourseId, user.Id, assignment);
             if (assignmentDirectory == null || !Directory.Exists(assignmentDirectory))
             {
+                assignmentDirectory = _directoryService.CreateStudentAssignmentDirectory(user.Id, assignment);
+            }
+            return assignmentDirectory;
+        }
+
+        public IEnumerable<Solution> SaveSolutionFiles(IEnumerable<IFormFile> files, Assignment assignment, ApplicationUser user)
+        {
+            string assignmentDirectory;
+            try
+            {
+                assignmentDirectory = GetOrCreateAssignmentDirectory(assignment, user);
+            }
+            catch (Exception)
+            {
+                throw new Exception("Could not create assignment directory");
+            }
+
+            var solutions = new List<Solution>();
+            foreach (var file in files)
+            {
+                string filePath;
                 try
                 {
-                    assignmentDirectory = _directoryService.CreateStudentAssignmentDirectory(user.Id, assignment);
+                    filePath = SaveFile(file, assignmentDirectory);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    throw new Exception("Could not create assignment directory", e);
+                    continue;
                 }
-            }
 
-            var filePath = Path.Combine(assignmentDirectory, file.FileName);
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                file.CopyTo(fileStream);
+                solutions.Add(new Solution
+                {
+                    AssignmentId = assignment.Id,
+                    CreatorId = user.Id,
+                    FilePath = Path.GetRelativePath(_basePath, filePath),
+                    CreatedAt = DateTime.Now
+                });
             }
-
-            return filePath;
+            
+            return solutions;
         }
     }
 }

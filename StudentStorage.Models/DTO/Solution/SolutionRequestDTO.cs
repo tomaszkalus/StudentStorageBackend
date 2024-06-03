@@ -4,7 +4,7 @@ namespace StudentStorage.Models.DTO.Solution
 {
     public class SolutionRequestDTO
     {
-        public IFormFile File { get; set; }
-        public string Description { get; set; }
+        public List<IFormFile> Files { get; set; }
     }
+
 }

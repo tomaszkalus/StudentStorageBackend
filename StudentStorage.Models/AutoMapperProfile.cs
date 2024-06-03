@@ -2,6 +2,7 @@
 using StudentStorage.Models.DTO;
 using StudentStorage.Models.DTO.Course;
 using StudentStorage.Models.DTO.Request;
+using StudentStorage.Models.DTO.Solution;
 using StudentStorage.Models.DTO.User;
 
 namespace StudentStorage.Models
@@ -45,6 +46,7 @@ namespace StudentStorage.Models
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt));
+
         }
     }
 }
