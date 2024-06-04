@@ -1,8 +1,7 @@
-﻿using StudentStorage.DataAccess.Repository.IRepository;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
 using System.Security.Claims;
-using System.Reflection;
 
 namespace StudentStorage.Authorization
 {
@@ -24,7 +23,7 @@ namespace StudentStorage.Authorization
                 return Task.CompletedTask;
             }
 
-            int userId = Int32.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier)); 
+            int userId = Int32.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (await _unitOfWork.User.IsCourseMemberAsync(userId, course.Id) || userId == course.CreatorId)
             {
                 context.Succeed(requirement);

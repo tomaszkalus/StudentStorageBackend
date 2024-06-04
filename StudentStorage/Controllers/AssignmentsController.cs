@@ -191,14 +191,7 @@ namespace StudentStorage.Controllers
             return Ok(solutionResponseDTOs);
         }
 
-        // DELETE api/Assignments/5/Solutions/1
-        [HttpDelete("{id}/Solutions/{solutionId}")]
-        [Authorize(Roles = UserRoles.Student)]
-        public async Task<IActionResult> DeleteSolution(int id, int solutionId)
-        {
-            // TODO
-            throw new NotImplementedException();
-        }
+        
 
         #endregion Solution
 

@@ -35,20 +35,32 @@ namespace StudentStorage.Services
             return new ServiceResult(true, "Assignment solution submitted successfully.");
         }
 
-        //public async Task<ServiceResult> GetUserSolution(int solutionId, ApplicationUser user)
-        //{
-        //    Solution? solution = await _unitOfWork.Solution.GetByIdAsync(solutionId);
-        //    if (solution == null)
-        //    {
-        //        return new ServiceResult(false, "Solution not found.");
-        //    }
+        public async Task<ServiceResult> DeleteAssignmentSolutionFileAsync(int solutionId, ApplicationUser user)
+        {
+            var solution = await _unitOfWork.Solution.GetByIdAsync(solutionId);
 
-        //    if (solution.CreatorId != user.Id)
-        //    {
-        //        return new ServiceResult(false, "You are not the creator of this solution.");
-        //    }
+            if (solution == null)
+            {
+                return new ServiceResult(false, "Solution not found.");
+            }
 
-        //    return new ServiceResult(true, "Solution found.", solution);
-        //}
+            try { 
+            _fileManagerService.DeleteSolutionFile(solution);
+            }
+            catch (Exception)
+            {
+                return new ServiceResult(false, "Failed to delete solution file.");
+            }
+
+            await _unitOfWork.Solution.RemoveAsync(solution);
+            await _unitOfWork.CommitAsync();
+
+            return new ServiceResult(true, "Assignment solution deleted successfully.");
+        }
+
+        public IFormFile GetAssignmentSolutionFile(Solution solution)
+        {
+            return _fileManagerService.GetSolutionFile(solution);
+        }
     }
 }

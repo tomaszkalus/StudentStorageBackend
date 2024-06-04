@@ -54,12 +54,13 @@ builder.Services.AddScoped<DirectoryService>();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("CourseMembershipPolicy", policy =>
-    {
-        policy.Requirements.Add(new CourseMembershipAuthorizationRequirement());
-    });
+        policy.Requirements.Add(new CourseMembershipAuthorizationRequirement()));
 
     options.AddPolicy("CourseCreatorPolicy", policy =>
         policy.Requirements.Add(new CourseCreatorAuthorizationRequirement()));
+
+    options.AddPolicy("SameUserPolicy", policy =>
+        policy.Requirements.Add(new SameUserAuthorizationRequirement()));
 });
 
 builder.Services.AddScoped<IAuthorizationHandler, CourseMembershipAuthorizationHandler>();

@@ -18,17 +18,6 @@ namespace StudentStorage.Services
             }
             _directoryService = directoryService;
         }
-
-        private byte[]? GetUserSolutionFile(Solution solution)
-        {
-            var path = Path.Combine(_basePath, solution.FilePath);
-            if (!File.Exists(path))
-            {
-                return null;
-            }
-            return File.ReadAllBytes(path);
-        }
-
         private string? SaveFile(IFormFile file, string directory)
         {
             var fileName = DirectoryNameBuilderService.RemoveInvalidFilenameCharacters(file.FileName);
@@ -90,11 +79,33 @@ namespace StudentStorage.Services
                     AssignmentId = assignment.Id,
                     CreatorId = user.Id,
                     FilePath = Path.GetRelativePath(_basePath, filePath),
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    SizeMb = (int)(file.Length / 1024 / 1024)
                 });
             }
             
             return solutions;
+        }
+
+        public void DeleteSolutionFile(Solution solution)
+        {
+            var path = Path.Combine(_basePath, solution.FilePath);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+
+        public IFormFile? GetSolutionFile(Solution solution)
+        {
+            var path = Path.Combine(_basePath, solution.FilePath);
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+            var length = new FileInfo(path).Length;
+            var fileName = Path.GetFileName(path);
+            return new FormFile(new MemoryStream(File.ReadAllBytes(path)), 0, length, fileName, fileName);
         }
     }
 }
