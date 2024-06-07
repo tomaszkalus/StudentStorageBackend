@@ -5,5 +5,6 @@
         public int Id { get; set; }
         public int SizeMb { get; set; }
         public string FileName { get; set; }
+        public DateTime createdAt { get; set; }
     }
 }

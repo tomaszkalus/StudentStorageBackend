@@ -1,10 +1,8 @@
-﻿namespace StudentStorage.Models.DTO.User
+﻿namespace StudentStorage.Models.DTO.User;
+public class UserDTO
 {
-    public class UserDTO
-    {
-        public string Id { get; set; }
-        public string UserName { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-    }
+    public string Id { get; set; }
+    public string UserName { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
 }

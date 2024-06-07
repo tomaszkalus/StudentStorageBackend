@@ -61,5 +61,14 @@ namespace StudentStorage.DataAccess.Repository
             return await _db.Courses
                 .AnyAsync(c => c.Id == courseId && c.CreatorId == userId);
         }
+
+        public async Task<IEnumerable<ApplicationUser>> GetCourseMembers(int courseId)
+        {
+            return await _db.Courses
+                .Include(c => c.Students)
+                .Where(c => c.Id == courseId)
+                .SelectMany(c => c.Students)
+                .ToListAsync();
+        }
     }
 }

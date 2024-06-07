@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using StudentStorage.Models;
 using StudentStorage.Models.Authentication;
+using StudentStorage.Models.Enums;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -21,7 +22,7 @@ namespace StudentStorage.Services
             _configuration = configuration;
         }
 
-        public async Task<(JwtSecurityToken? token, ApplicationUser? user)> Login(LoginModel model)
+        public async Task<(JwtSecurityToken? token, ApplicationUser? user)> Login(LoginDTO model)
         {
             var user = await _userManager.FindByNameAsync(model.Email);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
@@ -55,7 +56,7 @@ namespace StudentStorage.Services
             return token;
         }
 
-        private async Task<IdentityResult> Register(RegisterModel model, string role)
+        private async Task<IdentityResult> Register(RegisterDTO model, string role)
         {
             var userExists = await _userManager.FindByNameAsync(model.Email);
             if (userExists != null)
@@ -83,17 +84,17 @@ namespace StudentStorage.Services
             return IdentityResult.Success;
         }
 
-        public Task<IdentityResult> RegisterStudent(RegisterModel model)
+        public Task<IdentityResult> RegisterStudent(RegisterDTO model)
         {
             return Register(model, UserRoles.Student);
         }
 
-        public Task<IdentityResult> RegisterTeacher(RegisterModel model)
+        public Task<IdentityResult> RegisterTeacher(RegisterDTO model)
         {
             return Register(model, UserRoles.Teacher);
         }
 
-        public Task<IdentityResult> RegisterAdmin(RegisterModel model)
+        public Task<IdentityResult> RegisterAdmin(RegisterDTO model)
         {
             return Register(model, UserRoles.Admin);
         }
@@ -125,5 +126,24 @@ namespace StudentStorage.Services
                 await _userManager.AddToRoleAsync(user, role);
             }
         }
+
+        public async Task<IdentityResult> ChangePassword(ApplicationUser user, string newPassword)
+        {
+            string token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            return result;
+        }
+
+        public async Task<string> GetHighestRankingRoleAsync(ApplicationUser user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Contains(UserRoles.Admin))
+                return UserRoles.Admin;
+            if (roles.Contains(UserRoles.Teacher))
+                return UserRoles.Teacher;
+            return UserRoles.Student;
+        }
+
+        
     }
 }

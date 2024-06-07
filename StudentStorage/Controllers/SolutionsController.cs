@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
-using StudentStorage.Models.Authentication;
+using StudentStorage.Models.Enums;
 using StudentStorage.Services;
 
 namespace StudentStorage.Controllers

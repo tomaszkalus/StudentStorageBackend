@@ -10,5 +10,6 @@ namespace StudentStorage.DataAccess.Repository.IRepository
         Task<IEnumerable<Course>> GetCoursesAsync(int userId);
         Task<bool> IsCourseMemberAsync(int userId, int courseId);
         Task<bool> IsCourseAuthorAsync(int userId, int courseId);
+        Task<IEnumerable<ApplicationUser>> GetCourseMembers(int courseId);
     }
 }

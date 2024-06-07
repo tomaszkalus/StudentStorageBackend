@@ -2,7 +2,7 @@
 
 namespace StudentStorage.Models.Authentication
 {
-    public class RegisterModel
+    public class RegisterDTO
     {
         [Required(ErrorMessage = "First Name is required")]
         public string? FirstName { get; set; }

@@ -2,7 +2,7 @@
 
 namespace StudentStorage.Models.Authentication
 {
-    public class LoginModel
+    public class LoginDTO
     {
         [EmailAddress]
         [Required(ErrorMessage = "User Name is required")]

@@ -1,6 +1,7 @@
 ﻿using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
 using StudentStorage.Models.DTO.Solution;
+using StudentStorage.Models.Enums;
 
 namespace StudentStorage.Services
 {
@@ -13,6 +14,23 @@ namespace StudentStorage.Services
         {
             _unitOfWork = unitOfWork;
             _fileManagerService = fileManagerService;
+        }
+
+        public SolutionStatus GetSolutionStatus(IEnumerable<Solution> solutions)
+        {
+            if (solutions == null || solutions.Count() == 0)
+            {
+                return SolutionStatus.NotSubmitted;
+            }
+            var earliestSubmittedSolution = solutions.MinBy(x => x.CreatedAt);
+
+            if (earliestSubmittedSolution.CreatedAt > earliestSubmittedSolution.Assignment.DueDate )
+            {
+                return SolutionStatus.SubmittedLate;
+            }
+
+            return SolutionStatus.Submitted;
+
         }
 
         public async Task<ServiceResult> SubmitAssignmentSolutionFilesAsync(SolutionRequestDTO solutionRequest, Assignment assignment, ApplicationUser user)

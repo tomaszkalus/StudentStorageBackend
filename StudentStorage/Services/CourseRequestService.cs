@@ -17,6 +17,49 @@ namespace StudentStorage.Services
             _directoryService = directoryService;
         }
 
+        private async Task<bool> IsAnyRequestPending(ApplicationUser user, Course course)
+        {
+            IEnumerable<Request> pendingRequests = await _unitOfWork.Request.GetAllAsync(
+                               r => r.UserId == user.Id && r.CourseId == course.Id && r.Status == CourseRequestStatus.Pending);
+
+            return pendingRequests.Count() > 0;
+        }
+
+        public async Task<ServiceResult> CreateRequest(ApplicationUser user, Course course)
+        {
+            if (await _unitOfWork.User.IsCourseMemberAsync(user.Id, course.Id))
+            {
+                return new ServiceResult(false, "User is already a member of the course.");
+            }
+
+            if (await IsAnyRequestPending(user, course))
+            {
+                return new ServiceResult(false, "There is already a pending request for this course.");
+            }
+
+            Request request = new Request
+            {
+                CourseId = course.Id,
+                UserId = user.Id,
+                Status = CourseRequestStatus.Pending,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
+
+            try
+            {
+                await _unitOfWork.Request.AddAsync(request);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception)
+            {
+                return new ServiceResult(false, "There was an error when sending a request.");
+            }
+
+            return new ServiceResult(true, "");
+
+        }
+
         private async Task<ServiceResult> ApproveCourseRequestAsync(Request request)
         {
             try
@@ -32,7 +75,7 @@ namespace StudentStorage.Services
                     _directoryService.CreateStudentDirectory(request.Course, request.User);
 
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     await _unitOfWork.Rollback();
                     return new ServiceResult(false, ex.Message);

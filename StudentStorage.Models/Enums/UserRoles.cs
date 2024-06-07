@@ -1,4 +1,4 @@
-﻿namespace StudentStorage.Models.Authentication
+﻿namespace StudentStorage.Models.Enums
 {
     public static class UserRoles
     {

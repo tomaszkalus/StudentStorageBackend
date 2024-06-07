@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using StudentStorage.Models;
-using StudentStorage.Models.Authentication;
 using StudentStorage.Models.DTO;
 using StudentStorage.Models.DTO.Solution;
 using StudentStorage.Services;
+using StudentStorage.Models.Enums;
+using StudentStorage.Models.Responses;
+using StudentStorage.Models.DTO.User;
 
 namespace StudentStorage.Controllers
 {
@@ -43,7 +45,7 @@ namespace StudentStorage.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> GetAll()
         {
-            var Assignments = await _unitOfWork.Assignment.GetAllAsync(includeProperties: "Creator");
+            var Assignments = await _unitOfWork.Assignment.GetAllAsync(null, includeProperties: "Creator");
             IEnumerable<AssignmentResponseDTO> AssignmentResponseDTOs = Assignments.Select(_mapper.Map<AssignmentResponseDTO>);
             return Ok(AssignmentResponseDTOs);
         }
@@ -126,11 +128,24 @@ namespace StudentStorage.Controllers
             return Ok();
         }
 
+        
+
         #endregion Assignment
         #region Solution
 
+        /// <summary>
+        /// Adds a solution to an assignment. A solution contains one or more files.
+        /// </summary>
+        /// <param name="id">Assignment ID</param>
+        /// <param name="SolutionDTO">DTO of a solution provided by user.</param>
+        /// <returns code="200">If the operation was successful.</returns>
+        /// <returns code="400">If the there was an error.</returns>
+        /// <returns code="403">If the assignment belongs to the course that the user is not a member of.</returns>
         // POST api/Assignments/5/Solutions
         [HttpPost("{id}/Solutions")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(403)]
         [Authorize(Roles = UserRoles.Student)]
         public async Task<IActionResult> AddSolution(int id, [FromForm] SolutionRequestDTO SolutionDTO)
         {
@@ -158,15 +173,20 @@ namespace StudentStorage.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Retrieves all course members with the summary about their solutions for a given assignment.
+        /// </summary>
+        /// <param name="id">Assignment ID</param>
+        /// <returns></returns>
         // GET api/Assignments/5/Solutions
         [HttpGet("{id}/Solutions")]
-        [Authorize(Roles = UserRoles.Student)]
-        public async Task<IActionResult> GetSolutions(int id)
+        [Authorize(Roles = UserRoles.Teacher)]
+        public async Task<IActionResult> GetAssignmentSolutionSummary(int id)
         {
             Assignment? assignment = await _unitOfWork.Assignment.GetByIdAsync(id);
             if (assignment == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             var authorizationResult = await _authorizationService
@@ -176,22 +196,23 @@ namespace StudentStorage.Controllers
                 return Forbid();
             }
 
-            var currentUser = await _userManager.GetUserAsync(User);
-            var solutions = await _unitOfWork.Solution.GetAllUserAssignmentSolutions(id, currentUser.Id);
+            List<UserSolutionsSummaryDTO> userSolutionDTOs = new List<UserSolutionsSummaryDTO>();
+            IEnumerable<ApplicationUser> students = await _unitOfWork.User.GetCourseMembers(assignment.CourseId);
 
-            IEnumerable<SolutionResponseDTO> solutionResponseDTOs = solutions.Select(e =>
+            foreach(var student in students)
             {
-                return new SolutionResponseDTO
+                var solutions = await _unitOfWork.Solution.GetAllUserAssignmentSolutions(id, student.Id);
+                userSolutionDTOs.Add(new UserSolutionsSummaryDTO
                 {
-                    Id = e.Id,
-                    SizeMb = e.SizeMb,
-                    FileName = Path.GetFileName(e.FilePath)
-                };
-            });
-            return Ok(solutionResponseDTOs);
+                    Id = student.Id,
+                    UserName = student.UserName,
+                    FirstName = student.FirstName,
+                    LastName = student.LastName,
+                    SolutionStatus = _assignmentSolutionService.GetSolutionStatus(solutions).ToString()
+                });
+            }
+            return Ok(userSolutionDTOs);
         }
-
-        
 
         #endregion Solution
 

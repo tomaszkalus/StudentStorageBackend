@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using StudentStorage.Models;
-using StudentStorage.Models.Authentication;
 using StudentStorage.Models.DTO;
 using StudentStorage.Models.Enums;
 using System.Security.Claims;
@@ -24,14 +23,16 @@ namespace StudentStorage.Controllers
         IMapper _mapper;
         IAuthorizationService _authorizationService;
         CourseService _courseService;
+        CourseRequestService _courseRequestService;
 
-        public CoursesController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IAuthorizationService authorizationService, CourseService courseService)
+        public CoursesController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IAuthorizationService authorizationService, CourseService courseService, CourseRequestService courseRequestService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
             _authorizationService = authorizationService;
             _courseService = courseService;
+            _courseRequestService = courseRequestService;
         }
 
         #region Course
@@ -53,7 +54,7 @@ namespace StudentStorage.Controllers
         [Authorize(Roles = UserRoles.Student)]
         public async Task<IActionResult> GetAll()
         {
-            var courses = await _unitOfWork.Course.GetAllAsync(includeProperties: "Creator");
+            var courses = await _unitOfWork.Course.GetAllAsync(null, includeProperties: "Creator");
             IEnumerable<CourseResponseDTO> courseResponseDTOs = courses.Select(_mapper.Map<CourseResponseDTO>);
             return Ok(courseResponseDTOs);
         }
@@ -193,15 +194,18 @@ namespace StudentStorage.Controllers
         #region Request
 
         /// <summary>
-        /// Sends a request for the course creator to join the course.
+        /// Sends a request for the course creator to join the course. User can only send requests for courses they are not part of.
+        /// User cannot send requests to courses they have previously sent a request and it is still pending.
         /// </summary>
         /// <param name="id">
         /// Course ID
         /// </param>
+        /// <returns code="200">When the request was successfully sent</returns>
+        /// <returns code="400">When user is already part of the course or has pending request for that course.</returns>
         // POST /api/v1/Courses/5/Requests
         [HttpPost("{id}/Requests")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
+        [ProducesResponseType(typeof(string), 400)]
         [Authorize(Roles = UserRoles.Student)]
         public async Task<IActionResult> SendRequest(int id)
         {
@@ -210,19 +214,16 @@ namespace StudentStorage.Controllers
             {
                 return NotFound();
             }
+
             ApplicationUser? currentUser = await _userManager.GetUserAsync(HttpContext.User);
-            Request request = new Request
+            var result = await _courseRequestService.CreateRequest(currentUser, course);
+
+            if (!result.Success)
             {
-                CourseId = course.Id,
-                UserId = currentUser.Id,
-                Status = CourseRequestStatus.Pending,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
-            };
-            await _unitOfWork.Request.AddAsync(request);
-            await _unitOfWork.CommitAsync();
-            JoinRequestDTO joinRequestDTO = _mapper.Map<JoinRequestDTO>(request);
-            return Ok(joinRequestDTO);
+                return BadRequest(result.Message);
+            }
+
+            return Ok();
         }
 
         /// <summary>

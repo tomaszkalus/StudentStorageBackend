@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using StudentStorage.Models.Authentication;
+using StudentStorage.Models.Enums;
 using System.Security.Claims;
 
 namespace StudentStorage.Authorization
