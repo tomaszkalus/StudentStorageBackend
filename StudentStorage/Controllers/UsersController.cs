@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using StudentStorage.DataAccess.Repository.IRepository;
 using StudentStorage.Models;
 using StudentStorage.Models.DTO.Course;
@@ -22,14 +23,16 @@ public class UsersController : ControllerBase
     IMapper _mapper;
     IAuthorizationService _authorizationService;
     AccountService _accountService;
+    AssignmentSolutionService _assignmentSolutionService;
 
-    public UsersController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IAuthorizationService authorizationService, AccountService accountService)
+    public UsersController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IAuthorizationService authorizationService, AccountService accountService, AssignmentSolutionService assignmentSolutionService)
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
         _mapper = mapper;
         _authorizationService = authorizationService;
         _accountService = accountService;
+        _assignmentSolutionService = assignmentSolutionService;
     }
 
     /// <summary>
@@ -164,8 +167,8 @@ public class UsersController : ControllerBase
     /// <param name="id">User ID</param>
     /// <param name="assignmentId">Assignment ID</param>
     /// <returns>Collection of solutions DTOs for the assignment provided by the user.</returns>
-    // GET api/v1/Users/5/Assignments/5/Solutions
-    [HttpGet("{id}/Assignments/{assignmentId}/Solutions")]
+    // GET api/v1/Users/5/Assignments/5/Solutions/Details
+    [HttpGet("{id}/Assignments/{assignmentId}/Solutions/Details")]
     [Authorize(Roles = UserRoles.Student)]
     public async Task<IActionResult> GetSolutions(int id, int assignmentId)
     {
@@ -195,5 +198,58 @@ public class UsersController : ControllerBase
             };
         });
         return Ok(solutionResponseDTOs);
+    }
+
+    // GET api/v1/Users/5/Assignments/4/Solutions/zip
+    [HttpGet("{id}/Assignments/{assignmentId}/Solutions/zip")]
+    [Authorize(Roles = UserRoles.Teacher)]
+    public async Task<IActionResult> GetUserAssignmentSolutions(int id, int assignmentId)
+    {
+        var user = await _userManager.FindByIdAsync(id.ToString());
+
+        if (user == null)
+        {
+            return NotFound("The user was not found");
+        }
+
+        Assignment? assignment = await _unitOfWork.Assignment.GetByIdAsync(assignmentId);
+        if (assignment == null)
+        {
+            return NotFound("The assignment was not found");
+        }
+
+        if(!await _unitOfWork.User.IsCourseMemberAsync(id, assignment.CourseId))
+        {
+            return Forbid("The user is not a member of the course");
+        }
+
+        var authorizationResult = await _authorizationService
+        .AuthorizeAsync(User, assignment.Course, "CourseMembershipPolicy");
+        if (!authorizationResult.Succeeded) 
+        {
+            return Forbid();
+        }
+
+        IEnumerable<Solution> solutions = await _unitOfWork.Solution.GetAllUserAssignmentSolutions(assignmentId, id);
+
+        if(solutions.Count() == 0)
+        {
+            return NotFound("The user has not submitted any solutions for this assignment");
+        }
+
+        IFormFile archive = _assignmentSolutionService.GetUserAssignmentSolutionsArchive(solutions);
+
+        if (archive == null)
+        {
+            return NotFound();
+        }
+
+        var provider = new FileExtensionContentTypeProvider();
+        if (!provider.TryGetContentType(archive.FileName, out var mimeType))
+        {
+            mimeType = "application/octet-stream";
+        }
+
+        return File(archive.OpenReadStream(), mimeType, archive.FileName);
     }
 }

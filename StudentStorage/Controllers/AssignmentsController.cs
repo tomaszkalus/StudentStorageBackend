@@ -10,6 +10,8 @@ using StudentStorage.Services;
 using StudentStorage.Models.Enums;
 using StudentStorage.Models.Responses;
 using StudentStorage.Models.DTO.User;
+using System.Net.Mail;
+using System.Net;
 
 namespace StudentStorage.Controllers
 {
@@ -57,7 +59,7 @@ namespace StudentStorage.Controllers
         /// Assignment ID.
         /// </param>
         /// <returns>Returns an assignment</returns>
-        // GET api/Assignments/5
+        // GET api/v1/Assignments/5
         [HttpGet("{id}")]
         [Authorize(Roles = UserRoles.Student)]
         public async Task<IActionResult> Get(int id)
@@ -82,7 +84,9 @@ namespace StudentStorage.Controllers
         /// Assignment object.
         /// </param>
         /// <returns>Returns an updated assignment</returns>
-        // PUT api/Assignments/5
+        /// <response code="200">If the operation was successful.</response>
+        /// <response code="404">If the assignment with the given ID has not been found.</response>
+        // PUT api/v1/Assignments/5
         [HttpPut("{id}")]
         [Authorize(Roles = UserRoles.Teacher)]
         public async Task<ActionResult> Put(int id, [FromBody] AssignmentRequestDTO AssignmentDTO)
@@ -90,7 +94,7 @@ namespace StudentStorage.Controllers
             Assignment? Assignment = await _unitOfWork.Assignment.GetByIdAsync(id);
             if (Assignment == null)
             {
-                return BadRequest();
+                return NotFound();
             }
             Assignment.Title = AssignmentDTO.Title;
             Assignment.Description = AssignmentDTO.Description;
@@ -110,10 +114,10 @@ namespace StudentStorage.Controllers
         /// <param name="id">
         /// Assignment ID.
         /// </param>
-        /// <response code="200">The delete operation was successful.</response>
-        /// <response code="404">No assignment with that Id was found</response>
-        /// <response code="403">Access denied (Unauthorized)</response>
-        // DELETE api/Assignments/5
+        /// <response code="200">If the delete operation was successful.</response>
+        /// <response code="404">If no assignment with that Id was found</response>
+        /// <response code="403">If the user did not have a Teacher role</response>
+        // DELETE api/v1/Assignments/5
         [HttpDelete("{id}")]
         [Authorize(Roles = UserRoles.Teacher)]
         public async Task<IActionResult> Delete(int id)
@@ -128,7 +132,7 @@ namespace StudentStorage.Controllers
             return Ok();
         }
 
-        
+
 
         #endregion Assignment
         #region Solution
@@ -138,10 +142,10 @@ namespace StudentStorage.Controllers
         /// </summary>
         /// <param name="id">Assignment ID</param>
         /// <param name="SolutionDTO">DTO of a solution provided by user.</param>
-        /// <returns code="200">If the operation was successful.</returns>
-        /// <returns code="400">If the there was an error.</returns>
-        /// <returns code="403">If the assignment belongs to the course that the user is not a member of.</returns>
-        // POST api/Assignments/5/Solutions
+        /// <response code="200">If the operation was successful.</response>
+        /// <response code="400">If the there was an error.</response>
+        /// <response code="403">If the assignment belongs to the course that the user is not a member of.</response>
+        // POST api/v1/Assignments/5/Solutions
         [HttpPost("{id}/Solutions")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
@@ -177,9 +181,15 @@ namespace StudentStorage.Controllers
         /// Retrieves all course members with the summary about their solutions for a given assignment.
         /// </summary>
         /// <param name="id">Assignment ID</param>
-        /// <returns></returns>
-        // GET api/Assignments/5/Solutions
+        /// <returns>A list of DTOs containing users in course and the solution statuses for given assignment.</returns>
+        /// <response code="200">If the request was successful</response>
+        /// <response code="404">If the assignment has not been found.</response>
+        /// <response code="403">If the user did not have a Teacher role</response>
+        // GET api/v1/Assignments/5/Solutions
         [HttpGet("{id}/Solutions")]
+        [ProducesResponseType(typeof(List<UserSolutionsSummaryDTO>), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(403)]
         [Authorize(Roles = UserRoles.Teacher)]
         public async Task<IActionResult> GetAssignmentSolutionSummary(int id)
         {
@@ -213,7 +223,6 @@ namespace StudentStorage.Controllers
             }
             return Ok(userSolutionDTOs);
         }
-
         #endregion Solution
 
 

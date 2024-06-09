@@ -1,4 +1,5 @@
 ﻿using StudentStorage.Models;
+using System.IO.Compression;
 
 namespace StudentStorage.Services
 {
@@ -106,6 +107,38 @@ namespace StudentStorage.Services
             var length = new FileInfo(path).Length;
             var fileName = Path.GetFileName(path);
             return new FormFile(new MemoryStream(File.ReadAllBytes(path)), 0, length, fileName, fileName);
+        }
+
+        public IFormFile? CreateArchive(IEnumerable<IFormFile> files, string fileName)
+        {
+            var archivePath = Path.GetTempFileName();
+
+            using (var archiveStream = new FileStream(archivePath, FileMode.Create))
+            using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create))
+            {
+                foreach (var file in files)
+                {
+                    if (file == null)
+                    {
+                        continue;
+                    }
+
+                    var entry = archive.CreateEntry(file.FileName);
+                    using (var entryStream = entry.Open())
+                    {
+                        file.CopyTo(entryStream);
+                    }
+                }
+            }
+            var fileInfo = new FileInfo(archivePath);
+            var fileStream = new FileStream(archivePath, FileMode.Open);
+            FormFile formFile = new FormFile(fileStream, 0, fileInfo.Length, fileName, fileName);
+            
+            if (File.Exists(archivePath))
+            {
+                File.Delete(archivePath);
+            }
+            return formFile;
         }
     }
 }

@@ -32,5 +32,12 @@ namespace StudentStorage.Services
                 string rawDirName = $"{course.Creator.FirstName}_{course.Creator.LastName}_{normalizedCourseName}_{courseCreatedYear}_{course.Id}";
                 return RemoveInvalidFilenameCharacters(rawDirName);
             }
+
+            public static string GenerateAssignmentSolutionArchiveName(Solution solution)
+            {
+                string rawArchiveName = $"{solution.Creator.FirstName}_{solution.Creator.LastName}_{solution.Assignment.Title}.zip";
+                string archiveName = rawArchiveName.Replace(" ", "_");
+                return RemoveInvalidFilenameCharacters(archiveName);
+            }   
         }
 }

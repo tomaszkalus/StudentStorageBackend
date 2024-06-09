@@ -24,7 +24,7 @@ namespace StudentStorage.Services
             }
             var earliestSubmittedSolution = solutions.MinBy(x => x.CreatedAt);
 
-            if (earliestSubmittedSolution.CreatedAt > earliestSubmittedSolution.Assignment.DueDate )
+            if (earliestSubmittedSolution.CreatedAt > earliestSubmittedSolution.Assignment.DueDate)
             {
                 return SolutionStatus.SubmittedLate;
             }
@@ -35,7 +35,7 @@ namespace StudentStorage.Services
 
         public async Task<ServiceResult> SubmitAssignmentSolutionFilesAsync(SolutionRequestDTO solutionRequest, Assignment assignment, ApplicationUser user)
         {
-            
+
             var solutions = _fileManagerService.SaveSolutionFiles(solutionRequest.Files, assignment, user);
 
             if (solutions == null)
@@ -43,7 +43,7 @@ namespace StudentStorage.Services
                 return new ServiceResult(false, "Failed to save solution files.");
             }
 
-            foreach(var solution in solutions)
+            foreach (var solution in solutions)
             {
                 await _unitOfWork.Solution.AddAsync(solution);
             }
@@ -62,8 +62,9 @@ namespace StudentStorage.Services
                 return new ServiceResult(false, "Solution not found.");
             }
 
-            try { 
-            _fileManagerService.DeleteSolutionFile(solution);
+            try
+            {
+                _fileManagerService.DeleteSolutionFile(solution);
             }
             catch (Exception)
             {
@@ -79,6 +80,18 @@ namespace StudentStorage.Services
         public IFormFile GetAssignmentSolutionFile(Solution solution)
         {
             return _fileManagerService.GetSolutionFile(solution);
+        }
+
+        public IFormFile? GetUserAssignmentSolutionsArchive(IEnumerable<Solution> solutions)
+        {
+            if (solutions == null || solutions.Count() == 0)
+            {
+                return null;
+            }
+
+            List<IFormFile> solutionFiles = solutions.Select(GetAssignmentSolutionFile).ToList();
+            var archiveName = DirectoryNameBuilderService.GenerateAssignmentSolutionArchiveName(solutions.First());
+            return _fileManagerService.CreateArchive(solutionFiles, archiveName);
         }
     }
 }
