@@ -119,7 +119,7 @@ public class UsersController : ControllerBase
         .AuthorizeAsync(User, "CourseMembershipPolicy");
         if (!authorizationResult.Succeeded)
         {
-            return Forbid();
+            return Forbid("User can only access their own courses.");
         }
 
         IEnumerable<Course> courses = await _unitOfWork.User.GetUserCreatedCoursesAsync(id);
@@ -200,9 +200,21 @@ public class UsersController : ControllerBase
         return Ok(solutionResponseDTOs);
     }
 
+    /// <summary>
+    /// Gets user solutions for a given assignment, compressed to a zip file.
+    /// </summary>
+    /// <param name="id">User ID</param>
+    /// <param name="assignmentId">Assignment ID</param>
+    /// <response code="200">If the request was successful</response>
+    /// <response code="404">If the user, assignment or solutions have not been found.</response>
+    /// <response code="403">If the user is not a member of the course</response>
+    /// <returns>ZIP file containing user solutions for the assignment</returns>
     // GET api/v1/Users/5/Assignments/4/Solutions/zip
     [HttpGet("{id}/Assignments/{assignmentId}/Solutions/zip")]
     [Authorize(Roles = UserRoles.Teacher)]
+    [ProducesResponseType(typeof(FileStreamResult), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(403)]
     public async Task<IActionResult> GetUserAssignmentSolutions(int id, int assignmentId)
     {
         var user = await _userManager.FindByIdAsync(id.ToString());
@@ -218,16 +230,11 @@ public class UsersController : ControllerBase
             return NotFound("The assignment was not found");
         }
 
-        if(!await _unitOfWork.User.IsCourseMemberAsync(id, assignment.CourseId))
-        {
-            return Forbid("The user is not a member of the course");
-        }
-
         var authorizationResult = await _authorizationService
         .AuthorizeAsync(User, assignment.Course, "CourseMembershipPolicy");
         if (!authorizationResult.Succeeded) 
         {
-            return Forbid();
+            return Forbid("The user is not a member of the course");
         }
 
         IEnumerable<Solution> solutions = await _unitOfWork.Solution.GetAllUserAssignmentSolutions(assignmentId, id);
