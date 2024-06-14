@@ -47,11 +47,11 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         IEnumerable<ApplicationUser> users = await _unitOfWork.User.GetAllAsync();
-        List<UserAdminDto> userDTOs = new List<UserAdminDto>();
+        List<UserDetailsDto> userDTOs = new List<UserDetailsDto>();
 
         foreach (var user in users)
         {
-            var userAdminDto = new UserAdminDto
+            var userAdminDto = new UserDetailsDto
             {
                 Id = user.Id,
                 UserName = user.UserName,
@@ -71,15 +71,19 @@ public class UsersController : ControllerBase
     /// </summary>
     /// <param name="id">User ID</param>
     /// <returns>User DTO</returns>
+    /// <response code="200">If user requests his own userID or admin requests any existing user.</response>
+    /// <response code="404">If user has not been found.</response>
+    /// <response code="401">If user without admin privilages tries to access other user.</response>
     // GET api/Users/5/
     [HttpGet("{id}")]
     [Authorize(Roles = UserRoles.Student)]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(UserDetailsDto), 200)]
     [ProducesResponseType(404)]
     [ProducesResponseType(401)]
     public async Task<IActionResult> Get(int id)
     {
         ApplicationUser user = await _userManager.FindByIdAsync(id.ToString());
+
         if (user == null)
         {
             return NotFound();
@@ -92,8 +96,17 @@ public class UsersController : ControllerBase
             return Forbid();
         }
 
-        UserDTO userDTO = _mapper.Map<UserDTO>(user);
-        return Ok(userDTO);
+        UserDetailsDto dto = new UserDetailsDto
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Role = await _accountService.GetHighestRankingRoleAsync(user),
+            CreatedAt = user.CreatedAt
+        };
+
+        return Ok(dto);
     }
 
     /// <summary>
@@ -260,3 +273,4 @@ public class UsersController : ControllerBase
         return File(archive.OpenReadStream(), mimeType, archive.FileName);
     }
 }
+

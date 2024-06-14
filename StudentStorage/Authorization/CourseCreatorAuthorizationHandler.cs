@@ -5,6 +5,9 @@ using System.Security.Claims;
 
 namespace StudentStorage.Authorization
 {
+    /// <summary>
+    /// Authorization handler for enforcing that the current user is the creator of the target course.
+    /// </summary>
     public class CourseCreatorAuthorizationHandler : AuthorizationHandler<CourseCreatorAuthorizationRequirement, Course>
     {
         private readonly IUnitOfWork _unitOfWork;

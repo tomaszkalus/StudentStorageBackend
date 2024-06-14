@@ -65,6 +65,8 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddScoped<IAuthorizationHandler, CourseMembershipAuthorizationHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, CourseCreatorAuthorizationHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, SameUserAuthorizationHandler>();
+
 
 builder.Services.AddControllers();
 

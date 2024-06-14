@@ -1,7 +1,7 @@
 ﻿using StudentStorage.Models.Enums;
 
 namespace StudentStorage.Models.DTO.User;
-public class UserAdminDto
+public class UserDetailsDto
 {
     public int Id { get; set; }
     public string UserName { get; set; }
