@@ -141,15 +141,18 @@ namespace StudentStorage.Controllers
         public async Task<ActionResult> Put(int id, [FromBody] CourseRequestDTO courseDTO)
         {
             Course? course = await _unitOfWork.Course.GetByIdAsync(id);
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (course == null)
             {
                 return NotFound();
             }
-            if (course.CreatorId != userId)
+            var authorizationResult = await _authorizationService
+            .AuthorizeAsync(User, course, "CourseCreatorPolicy");
+
+            if (!authorizationResult.Succeeded)
             {
                 return Forbid();
             }
+
             course.Name = courseDTO.Name;
             course.Description = courseDTO.Description;
 
@@ -175,15 +178,19 @@ namespace StudentStorage.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             Course? course = await _unitOfWork.Course.GetByIdAsync(id);
-            int userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (course == null)
             {
                 return NotFound();
             }
-            if (course.CreatorId != userId)
+
+            var authorizationResult = await _authorizationService
+            .AuthorizeAsync(User, course, "CourseCreatorPolicy");
+
+            if (!authorizationResult.Succeeded)
             {
                 return Forbid();
             }
+
             await _unitOfWork.Course.RemoveAsync(course);
             await _unitOfWork.CommitAsync();
             return Ok();

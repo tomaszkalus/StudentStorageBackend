@@ -35,6 +35,36 @@ public class UsersController : ControllerBase
         _assignmentSolutionService = assignmentSolutionService;
     }
 
+    
+    /// <summary>
+    /// Deletes user by ID. Users can only delete their own account. Admins can delete any account.
+    /// </summary>
+    /// <param name="id">User ID</param>
+    // DELETE api/Users/5
+    [HttpDelete("{id}")]
+    [Authorize]
+    public async Task<IActionResult> Delete(int id)
+    {
+        ApplicationUser user = await _userManager.FindByIdAsync(id.ToString());
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var authorizationResult = await _authorizationService
+        .AuthorizeAsync(User, "SameUserPolicy");
+        if (!authorizationResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        await _unitOfWork.User.RemoveAsync(user);
+        await _unitOfWork.CommitAsync();
+        return NoContent();
+
+    }
+
     /// <summary>
     /// Gets all users. Only admins can access this endpoint.
     /// </summary>

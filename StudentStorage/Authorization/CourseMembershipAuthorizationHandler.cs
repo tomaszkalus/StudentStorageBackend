@@ -5,14 +5,14 @@ using System.Security.Claims;
 
 namespace StudentStorage.Authorization
 {
-    public class CourseMembershipAuthorizationHandler : AuthorizationHandler<CourseMembershipAuthorizationRequirement, Course>
+    public class CourseMembershipAuthorizationHandler : AuthorizationHandlerBase<CourseMembershipAuthorizationRequirement, Course>
     {
         private readonly IUnitOfWork _unitOfWork;
         public CourseMembershipAuthorizationHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
-        protected async override Task<Task> HandleRequirementAsync(AuthorizationHandlerContext context,
+        protected async override Task<Task> HandleAsync(AuthorizationHandlerContext context,
             CourseMembershipAuthorizationRequirement requirement,
             Course course)
         {

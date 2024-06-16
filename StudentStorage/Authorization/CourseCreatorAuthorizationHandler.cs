@@ -1,5 +1,4 @@
-﻿using StudentStorage.DataAccess.Repository.IRepository;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using StudentStorage.Models;
 using System.Security.Claims;
 
@@ -8,24 +7,10 @@ namespace StudentStorage.Authorization
     /// <summary>
     /// Authorization handler for enforcing that the current user is the creator of the target course.
     /// </summary>
-    public class CourseCreatorAuthorizationHandler : AuthorizationHandler<CourseCreatorAuthorizationRequirement, Course>
+    public class CourseCreatorAuthorizationHandler : AuthorizationHandlerBase<CourseCreatorAuthorizationRequirement, Course>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        public CourseCreatorAuthorizationHandler(IUnitOfWork unitOfWork)
+        protected override Task HandleAsync(AuthorizationHandlerContext context, CourseCreatorAuthorizationRequirement requirement, Course resource)
         {
-            _unitOfWork = unitOfWork;
-        }
-        protected async override Task<Task> HandleRequirementAsync(AuthorizationHandlerContext context, 
-            CourseCreatorAuthorizationRequirement requirement, 
-            Course resource)
-        {
-            string? userIdString = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdString == null)
-            {
-                context.Fail();
-                return Task.CompletedTask;
-            }
-
             int userId = Int32.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (userId == resource.CreatorId)
             {
@@ -36,7 +21,6 @@ namespace StudentStorage.Authorization
                 context.Fail();
             }
             return Task.CompletedTask;
-
         }
     }
 }
