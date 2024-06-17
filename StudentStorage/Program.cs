@@ -50,6 +50,9 @@ builder.Services.AddScoped<CourseService>();
 builder.Services.AddScoped<AssignmentSolutionService>();
 builder.Services.AddScoped<FileManagerService>();
 builder.Services.AddScoped<DirectoryService>();
+builder.Services.AddScoped<InvitationTokenService>();
+builder.Services.AddScoped<MailingService>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthorization(options =>
 {

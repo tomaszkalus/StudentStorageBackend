@@ -12,6 +12,7 @@ namespace StudentStorage.DataAccess.Data
         public DbSet<ApplicationUser> Users { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<Solution> Solutions { get; set; }
+        public DbSet<InvitationToken> InvitationTokens { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {

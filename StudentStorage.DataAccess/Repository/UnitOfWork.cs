@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using StudentStorage.DataAccess.Data;
 using StudentStorage.DataAccess.Repository.IRepository;
+using StudentStorage.Models;
 
 namespace StudentStorage.DataAccess.Repository
 {
@@ -12,6 +13,7 @@ namespace StudentStorage.DataAccess.Repository
         public IRequestRepository Request { get; private set; }
         public IUserRepository User { get; private set; }
         public ISolutionRepository Solution { get; private set; }
+        public InvitationTokenRepository InvitationToken { get; private set; }
 
         private IDbContextTransaction? _transaction;
 
@@ -23,6 +25,7 @@ namespace StudentStorage.DataAccess.Repository
             Request = new RequestRepository(_db);
             User = new UserRepository(_db);
             Solution = new SolutionRepository(_db);
+            InvitationToken = new InvitationTokenRepository(_db);
         }
 
         public async Task CommitAsync()

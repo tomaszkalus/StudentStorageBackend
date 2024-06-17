@@ -46,7 +46,7 @@ namespace StudentStorage.Tests
             // Arrange
             var fakeCoursesNumber = 5;
             var fakeCourses = new List<Course>(new Course[fakeCoursesNumber]);
-            A.CallTo(() => _unitOfWork.Course.GetAllAsync("Creator")).Returns(fakeCourses);
+            A.CallTo(() => _unitOfWork.Course.GetAllAsync(null, "Creator")).Returns(fakeCourses);
 
             var fakeCourseResponseDTOs = fakeCourses.Select(c => new CourseResponseDTO()).ToList();
             A.CallTo(() => _mapper.Map<CourseResponseDTO>(A<Course>.Ignored)).Returns(fakeCourseResponseDTOs.First()).Once()

@@ -10,6 +10,7 @@ namespace StudentStorage.DataAccess.Repository.IRepository
         IRequestRepository Request { get; }
         IUserRepository User { get; }
         ISolutionRepository Solution { get; }
+        InvitationTokenRepository InvitationToken { get; }
 
         Task BeginTransactionAsync();
         Task CommitAsync();

@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using StudentStorage.Models;
 using StudentStorage.Models.Authentication;
 using StudentStorage.Models.DTO.Authentication;
+using StudentStorage.Models.Enums;
 using StudentStorage.Models.Responses;
 using StudentStorage.Services;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace StudentStorage.Controllers
@@ -16,12 +18,16 @@ namespace StudentStorage.Controllers
     {
         private readonly AccountService _accountService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly MailingService _mailingService;
+        private readonly InvitationTokenService _invitationTokenService;
 
         public AuthenticateController(
-            AccountService accountService, UserManager<ApplicationUser> userManager)
+            AccountService accountService, UserManager<ApplicationUser> userManager, MailingService mailingService, InvitationTokenService invitationTokenService)
         {
             _accountService = accountService;
             _userManager = userManager;
+            _mailingService = mailingService;
+            _invitationTokenService = invitationTokenService;
         }
 
         /// <summary>
@@ -91,10 +97,20 @@ namespace StudentStorage.Controllers
 
         [HttpPost]
         [Route("register-teacher")]
-        //[Authorize(Roles = UserRoles.Admin)]
-        public async Task<IActionResult> RegisterTeacher([FromBody] RegisterDTO model)
+        public async Task<IActionResult> RegisterTeacher([FromBody] RegisterTeacherDTO model)
         {
-            return await RegisterUser(model, _accountService.RegisterTeacher);
+            var result = await _invitationTokenService.ValidateInvitationToken(model.Email, model.Token);
+            if (!result.Success)
+                return BadRequest(new ResponseFail { Data = new string[] { result.Message } });
+
+            RegisterDTO registerDTO = new RegisterDTO
+            {
+                Email = model.Email,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Password = model.Password
+            };
+            return await RegisterUser(registerDTO, _accountService.RegisterTeacher);
         }
 
         [HttpPost]
@@ -115,6 +131,23 @@ namespace StudentStorage.Controllers
                 List<string> descriptions = result.Errors.Select(x => x.Description).ToList();
                 return BadRequest(new ResponseFail { Data = descriptions });
             }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = UserRoles.Admin)]
+        [Route("invitations")]
+        public async Task<IActionResult> SendTeacherInvitation([FromBody] string mail)
+        {
+            EmailAddressAttribute emailValidator = new EmailAddressAttribute();
+            if (!emailValidator.IsValid(mail))
+                return BadRequest(new ResponseFail { Data = new string[] { "Invalid email address." } });
+
+            var result = await _invitationTokenService.SendInvitationMessage(mail);
+
+            if (!result.Success)
+                return BadRequest(new ResponseFail { Data = new string[] { result.Message } });
+
+            return Ok();
         }
     }
 }

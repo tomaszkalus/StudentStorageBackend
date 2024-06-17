@@ -143,7 +143,5 @@ namespace StudentStorage.Services
                 return UserRoles.Teacher;
             return UserRoles.Student;
         }
-
-        
     }
 }

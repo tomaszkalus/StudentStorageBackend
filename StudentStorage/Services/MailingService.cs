@@ -5,14 +5,25 @@ namespace StudentStorage.Services
 {
     public class MailingService
     {
-        public void SendMail(string emailBody, string emailTopic, string recipentEmail)
+        public void SendMail(string emailBody, string emailTopic, string recipientEmail)
         {
-            var client = new SmtpClient("smtp.gmail.com", 587)
+            using (var client = new SmtpClient("smtp.gmail.com", 587)
             {
                 Credentials = new NetworkCredential("studentstoragepolsl@gmail.com", Environment.GetEnvironmentVariable("gmail_password")),
                 EnableSsl = true
-            };
-            client.Send("studentstoragepolsl@gmail.com", recipentEmail, emailTopic, emailBody);
+            })
+            {
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress("studentstoragepolsl@gmail.com"),
+                    Subject = emailTopic,
+                    Body = emailBody,
+                    IsBodyHtml = true
+                };
+                mailMessage.To.Add(recipientEmail);
+
+                client.Send(mailMessage);
+            }
         }
     }
 }
