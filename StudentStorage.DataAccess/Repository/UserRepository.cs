@@ -39,6 +39,7 @@ namespace StudentStorage.DataAccess.Repository
         {
             return await _db.Courses
                 .Include(c => c.Students)
+                .Include(c => c.Creator)
                 .Where(c => c.Students.Any(s => s.Id == userId))
                 .ToListAsync();
         }

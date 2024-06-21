@@ -25,7 +25,8 @@ namespace StudentStorage.Models
                 .ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.Creator));
 
             CreateMap<Request, RequestResponseDTO>()
-                .ForMember(dest => dest.StatusDescription, opt => opt.MapFrom(src => src.Status.ToString()));
+                .ForMember(dest => dest.StatusDescription, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User));
 
             CreateMap<Assignment, AssignmentResponseDTO>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))

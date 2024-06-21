@@ -35,12 +35,12 @@ public class UsersController : ControllerBase
         _assignmentSolutionService = assignmentSolutionService;
     }
 
-    
+
     /// <summary>
     /// Deletes user by ID. Users can only delete their own account. Admins can delete any account.
     /// </summary>
     /// <param name="id">User ID</param>
-    // DELETE api/Users/5
+    // DELETE api/v1/Users/5
     [HttpDelete("{id}")]
     [Authorize]
     public async Task<IActionResult> Delete(int id)
@@ -69,7 +69,7 @@ public class UsersController : ControllerBase
     /// Gets all users. Only admins can access this endpoint.
     /// </summary>
     /// <returns code="200">List of DTOs of all the application users</returns>
-    // GET api/Users
+    // GET api/v1/Users
     [HttpGet]
     [Authorize(Roles = UserRoles.Admin)]
     [ProducesResponseType(200)]
@@ -104,7 +104,7 @@ public class UsersController : ControllerBase
     /// <response code="200">If user requests his own userID or admin requests any existing user.</response>
     /// <response code="404">If user has not been found.</response>
     /// <response code="401">If user without admin privilages tries to access other user.</response>
-    // GET api/Users/5/
+    // GET api/v1/Users/5/
     [HttpGet("{id}")]
     [Authorize(Roles = UserRoles.Student)]
     [ProducesResponseType(typeof(UserDetailsDto), 200)]
@@ -140,12 +140,12 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Gets all user courses. Students can only access their own courses.
+    /// Gets all courses that the user is enrolled to.
     /// </summary>
     /// <param name="id">User ID</param>
     /// <returns>Array of DTOs for every course that user is enrolled to.</returns>
-    // GET api/Users/5/Courses
-    [HttpGet("{id}/Courses")]
+    // GET api/v1/Users/5/MemberCourses
+    [HttpGet("{id}/MemberCourses")]
     [Authorize(Roles = UserRoles.Student)]
     [ProducesResponseType(200)]
     [ProducesResponseType(404)]
@@ -159,10 +159,34 @@ public class UsersController : ControllerBase
         }
 
         var authorizationResult = await _authorizationService
-        .AuthorizeAsync(User, "CourseMembershipPolicy");
+        .AuthorizeAsync(User, "SameUserPolicy");
         if (!authorizationResult.Succeeded)
         {
-            return Forbid("User can only access their own courses.");
+            return Problem("User can only access their own courses.", statusCode: 401);
+        }
+
+        IEnumerable<Course> courses = await _unitOfWork.User.GetCoursesAsync(id);
+        IEnumerable<CourseResponseDTO> courseResponseDTOs = courses.Select(_mapper.Map<CourseResponseDTO>);
+        return Ok(courseResponseDTOs);
+    }
+
+    /// <summary>
+    /// Gets all courses that the user has created.
+    /// </summary>
+    /// <param name="id">User ID</param>
+    /// <returns>Array of DTOs for every course that user has created.</returns>
+    // GET api/v1/Users/5/CreatedCourses
+    [HttpGet("{id}/CreatedCourses")]
+    [Authorize(Roles = UserRoles.Student)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(401)]
+    public async Task<IActionResult> GetCreatedCourses(int id)
+    {
+        ApplicationUser user = await _userManager.FindByIdAsync(id.ToString());
+        if (user == null)
+        {
+            return NotFound();
         }
 
         IEnumerable<Course> courses = await _unitOfWork.User.GetUserCreatedCoursesAsync(id);
@@ -177,7 +201,7 @@ public class UsersController : ControllerBase
     /// <returns>All users pending requests.</returns>
     /// <response code="201">Returns the newly created item</response>
     /// <response code="400">If the item is null</response>
-    // GET api/Users/5/Requests/Pending
+    // GET api/v1/Users/5/Requests/Pending
     [HttpGet("{id}/Requests/Pending")]
     [Authorize(Roles = UserRoles.Student)]
     [ProducesResponseType(200)]
@@ -192,7 +216,7 @@ public class UsersController : ControllerBase
         }
 
         var authorizationResult = await _authorizationService
-        .AuthorizeAsync(User, "CourseMembershipPolicy");
+        .AuthorizeAsync(User, "SameUserPolicy");
         if (!authorizationResult.Succeeded)
         {
             return Forbid();

@@ -95,6 +95,10 @@ namespace StudentStorage.Controllers
             return await RegisterUser(model, _accountService.RegisterStudent);
         }
 
+        /// <summary>
+        /// Registers a new teacher account. The teacher must have an valid invitation token.
+        /// </summary>
+        /// <param name="model">DTO containing user information and the invitation token</param>
         [HttpPost]
         [Route("register-teacher")]
         public async Task<IActionResult> RegisterTeacher([FromBody] RegisterTeacherDTO model)
@@ -133,6 +137,10 @@ namespace StudentStorage.Controllers
             }
         }
 
+        /// <summary>
+        /// Sends an e-mail invitation to the teacher. Only for admin.
+        /// </summary>
+        /// <param name="mail">E-mail address for the teacher</param>
         [HttpPost]
         [Authorize(Roles = UserRoles.Admin)]
         [Route("invitations")]
