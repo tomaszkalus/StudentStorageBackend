@@ -253,15 +253,16 @@ public class UsersController : ControllerBase
         }
 
         var currentUser = await _userManager.GetUserAsync(User);
-        var solutions = await _unitOfWork.Solution.GetAllUserAssignmentSolutions(id, currentUser.Id);
+        var solutions = await _unitOfWork.Solution.GetAllUserAssignmentSolutions(assignmentId, id);
 
         IEnumerable<SolutionResponseDTO> solutionResponseDTOs = solutions.Select(e =>
         {
             return new SolutionResponseDTO
             {
                 Id = e.Id,
-                SizeMb = e.SizeMb,
-                FileName = Path.GetFileName(e.FilePath)
+                SizeBytes = e.SizeBytes,
+                FileName = Path.GetFileName(e.FilePath),
+                CreatedAt = e.CreatedAt
             };
         });
         return Ok(solutionResponseDTOs);

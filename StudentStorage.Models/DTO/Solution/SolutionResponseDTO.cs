@@ -3,8 +3,8 @@
     public class SolutionResponseDTO
     {
         public int Id { get; set; }
-        public int SizeMb { get; set; }
+        public int SizeBytes { get; set; }
         public string FileName { get; set; }
-        public DateTime createdAt { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

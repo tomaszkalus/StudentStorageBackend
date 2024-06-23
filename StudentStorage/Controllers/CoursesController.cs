@@ -260,8 +260,7 @@ namespace StudentStorage.Controllers
             {
                 return Forbid();
             }
-            var requests = course.Requests;
-            var pendingRequests = requests.Where(r => r.Status == CourseRequestStatus.Pending);
+            var requests = await _unitOfWork.Request.GetAllAsync(r => r.CourseId == id && r.Status == CourseRequestStatus.Pending, "User");
             var requestResponseDTOs = requests.Select(_mapper.Map<RequestResponseDTO>);
             return Ok(requestResponseDTOs);
         }

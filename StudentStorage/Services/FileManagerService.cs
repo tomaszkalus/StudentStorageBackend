@@ -81,7 +81,7 @@ namespace StudentStorage.Services
                     CreatorId = user.Id,
                     FilePath = Path.GetRelativePath(_basePath, filePath),
                     CreatedAt = DateTime.Now,
-                    SizeMb = (int)(file.Length / 1024 / 1024)
+                    SizeBytes = (int)(file.Length)
                 });
             }
             

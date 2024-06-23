@@ -8,7 +8,7 @@ namespace StudentStorage.Models
         public int CreatorId { get; set; }
         public int AssignmentId { get; set; }
         public string FilePath { get; set; }
-        public int SizeMb { get; set; }
+        public int SizeBytes { get; set; }
         public DateTime CreatedAt { get; set; }
 
         // navigation properties
