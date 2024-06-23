@@ -111,10 +111,8 @@ namespace StudentStorage.Services
 
         public IFormFile? CreateArchive(IEnumerable<IFormFile> files, string fileName)
         {
-            var archivePath = Path.GetTempFileName();
-
-            using (var archiveStream = new FileStream(archivePath, FileMode.Create))
-            using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create))
+            var memoryStream = new MemoryStream();
+            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
             {
                 foreach (var file in files)
                 {
@@ -130,15 +128,16 @@ namespace StudentStorage.Services
                     }
                 }
             }
-            var fileInfo = new FileInfo(archivePath);
-            var fileStream = new FileStream(archivePath, FileMode.Open);
-            FormFile formFile = new FormFile(fileStream, 0, fileInfo.Length, fileName, fileName);
-            
-            if (File.Exists(archivePath))
-            {
-                File.Delete(archivePath);
-            }
+
+            // Important: Reset the position of the MemoryStream to the beginning.
+            memoryStream.Position = 0;
+
+            // Create a FormFile from the MemoryStream without disposing of the MemoryStream.
+            var formFile = new FormFile(memoryStream, 0, memoryStream.Length, fileName, fileName);
+
             return formFile;
         }
+
+
     }
 }

@@ -325,7 +325,13 @@ public class UsersController : ControllerBase
             mimeType = "application/octet-stream";
         }
 
-        return File(archive.OpenReadStream(), mimeType, archive.FileName);
+        // Ensure the MemoryStream used by the FormFile is disposed after use
+        using (var memoryStream = new MemoryStream())
+        {
+            await archive.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+            return File(memoryStream.ToArray(), mimeType, archive.FileName);
+        }
     }
 }
 

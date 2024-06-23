@@ -234,12 +234,12 @@ namespace StudentStorage.Controllers
         }
 
         /// <summary>
-        /// Gets pending request for the course.
+        /// Get all requests for the course.
         /// </summary>
         /// <param name="id">
         /// Course ID
         /// </param>
-        /// <returns>Returns an array of all pending requests</returns>
+        /// <returns>Returns an array of all requests</returns>
         // GET api/v1/Courses/5/Requests/Pending
         [HttpGet("{id}/Requests/Pending")]
         [ProducesResponseType(typeof(List<RequestResponseDTO>), 200)]
@@ -260,7 +260,7 @@ namespace StudentStorage.Controllers
             {
                 return Forbid();
             }
-            var requests = await _unitOfWork.Request.GetAllAsync(r => r.CourseId == id && r.Status == CourseRequestStatus.Pending, "User");
+            var requests = await _unitOfWork.Request.GetAllAsync(r => r.CourseId == id, "User");
             var requestResponseDTOs = requests.Select(_mapper.Map<RequestResponseDTO>);
             return Ok(requestResponseDTOs);
         }
